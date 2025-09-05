@@ -1,0 +1,103 @@
+######################################
+# Global Common
+######################################
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.iws
+*.iml
+*.ipr
+
+######################################
+# Web (React)
+######################################
+smart-parcel-web/node_modules
+smart-parcel-web/dist
+smart-parcel-web/dist-ssr
+smart-parcel-web/*.local
+
+######################################
+# Backend (Spring Boot / Gradle)
+######################################
+smart-parcel-backend/HELP.md
+smart-parcel-backend/.gradle
+smart-parcel-backend/build/
+!smart-parcel-backend/gradle/wrapper/gradle-wrapper.jar
+!smart-parcel-backend/**/src/main/**/build/
+!smart-parcel-backend/**/src/test/**/build/
+
+# Spring/STS
+smart-parcel-backend/.apt_generated
+smart-parcel-backend/.classpath
+smart-parcel-backend/.factorypath
+smart-parcel-backend/.project
+smart-parcel-backend/.settings
+smart-parcel-backend/.springBeans
+smart-parcel-backend/.sts4-cache
+smart-parcel-backend/bin/
+!smart-parcel-backend/**/src/main/**/bin/
+!smart-parcel-backend/**/src/test/**/bin/
+
+# IntelliJ
+smart-parcel-backend/out/
+!smart-parcel-backend/**/src/main/**/out/
+!smart-parcel-backend/**/src/test/**/out/
+
+# NetBeans
+smart-parcel-backend/nbproject/private/
+smart-parcel-backend/nbbuild/
+smart-parcel-backend/dist/
+smart-parcel-backend/nbdist/
+smart-parcel-backend/.nb-gradle/
+
+######################################
+# Mobile (Flutter)
+######################################
+# Misc
+smart-parcel-mobile/*.class
+smart-parcel-mobile/*.pyc
+smart-parcel-mobile/*.swp
+smart-parcel-mobile/.atom/
+smart-parcel-mobile/.build/
+smart-parcel-mobile/.buildlog/
+smart-parcel-mobile/.history
+smart-parcel-mobile/.svn/
+smart-parcel-mobile/.swiftpm/
+smart-parcel-mobile/migrate_working_dir/
+
+# Flutter/Dart/Pub
+smart-parcel-mobile/**/doc/api/
+smart-parcel-mobile/**/ios/Flutter/.last_build_id
+smart-parcel-mobile/.dart_tool/
+smart-parcel-mobile/.flutter-plugins
+smart-parcel-mobile/.flutter-plugins-dependencies
+smart-parcel-mobile/.pub-cache/
+smart-parcel-mobile/.pub/
+smart-parcel-mobile/build/
+
+# Symbolication / Obfuscation
+smart-parcel-mobile/app.*.symbols
+smart-parcel-mobile/app.*.map.json
+
+# Android Studio
+smart-parcel-mobile/android/app/debug
+smart-parcel-mobile/android/app/profile
+smart-parcel-mobile/android/app/release
