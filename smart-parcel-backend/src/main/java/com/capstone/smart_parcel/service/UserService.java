@@ -34,7 +34,7 @@ public class UserService {
         user.setEmail(email);
         user.setName(dto.getName());
         user.setBizNumber(dto.getBizNumber());
-        user.setRole(UserRole.STAFF); // 기본 권한
+        user.setRole(dto.getRole()); // 기본 권한
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         userRepository.save(user);

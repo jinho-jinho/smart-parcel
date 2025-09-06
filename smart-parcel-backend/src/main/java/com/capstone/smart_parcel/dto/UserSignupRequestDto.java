@@ -1,5 +1,6 @@
 package com.capstone.smart_parcel.dto;
 
+import com.capstone.smart_parcel.domain.UserRole;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,4 +24,6 @@ public class UserSignupRequestDto {
     private String name;
 
     private String bizNumber;
+
+    private UserRole role;
 }
