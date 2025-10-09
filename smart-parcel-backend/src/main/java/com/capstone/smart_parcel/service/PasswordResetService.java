@@ -1,6 +1,6 @@
 package com.capstone.smart_parcel.service;
 
-import com.capstone.smart_parcel.domain.VerificationPurpose;
+import com.capstone.smart_parcel.domain.enums.VerificationPurpose;
 import com.capstone.smart_parcel.repository.EmailVerificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class PasswordResetService {
 
     @Transactional
     public void resetPassword(String email, String code, String newPassword) {
-        var v = repository.findTopByEmailAndPurposeOrderByIdDesc(
+        var v = repository.findByEmailAndPurpose(
                 email, VerificationPurpose.RESET_PASSWORD
         ).orElseThrow(() -> new IllegalArgumentException("인증 요청을 먼저 해주세요"));
 

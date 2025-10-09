@@ -1,6 +1,6 @@
 package com.capstone.smart_parcel.service;
 
-import com.capstone.smart_parcel.domain.VerificationPurpose;
+import com.capstone.smart_parcel.domain.enums.VerificationPurpose;
 import com.capstone.smart_parcel.repository.EmailVerificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
@@ -39,7 +39,7 @@ public class EmailService {
     @Transactional
     public void verifyCode(String rawEmail, String code, VerificationPurpose purpose) {
         String email = normalize(rawEmail);
-        var verification = repository.findTopByEmailAndPurposeOrderByIdDesc(email, purpose)
+        var verification = repository.findByEmailAndPurpose(email, purpose)
                 .orElseThrow(() -> new IllegalArgumentException("인증 요청을 먼저 해주세요."));
 
         if (verification.isVerified()) throw new IllegalStateException("이미 인증된 이메일입니다.");

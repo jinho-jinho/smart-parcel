@@ -1,7 +1,6 @@
 package com.capstone.smart_parcel.dto;
 
-import com.capstone.smart_parcel.domain.UserRole;
-import jakarta.annotation.Nullable;
+import com.capstone.smart_parcel.domain.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -23,7 +22,10 @@ public class UserSignupRequestDto {
     @NotBlank(message = "이름은 필수입니다.")
     private String name;
 
+    private UserRole role;
+
     private String bizNumber;
 
-    private UserRole role;
+    private Long managerId;
+
 }

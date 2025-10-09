@@ -1,6 +1,6 @@
 package com.capstone.smart_parcel.controller;
 
-import com.capstone.smart_parcel.domain.VerificationPurpose;
+import com.capstone.smart_parcel.domain.enums.VerificationPurpose;
 import com.capstone.smart_parcel.dto.common.ApiResponse;
 import com.capstone.smart_parcel.service.EmailService;
 import lombok.RequiredArgsConstructor;

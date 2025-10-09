@@ -26,10 +26,8 @@ public class RefreshTokenStore {
     /** jti가 Redis에 존재하는지 확인 (유효성 체크) */
     public boolean existsJti(String jti) {
         String key = "RTJTI:" + jti;
-        Boolean has = redis.hasKey(key);
-        return Boolean.TRUE.equals(has);
+        return redis.hasKey(key);
     }
-
     /** jti 삭제 (로그아웃 or 회전 시 사용) */
     public void deleteJti(String jti) {
         redis.delete("RTJTI:" + jti);

@@ -1,7 +1,6 @@
 package com.capstone.smart_parcel.service;
 
 import com.capstone.smart_parcel.domain.User;
-import com.capstone.smart_parcel.domain.UserRole;
 import com.capstone.smart_parcel.dto.UserLoginRequestDto;
 import com.capstone.smart_parcel.dto.UserResponseDto;
 import com.capstone.smart_parcel.dto.UserSignupRequestDto;

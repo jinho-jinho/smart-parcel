@@ -2,7 +2,7 @@ package com.capstone.smart_parcel.repository;
 
 
 import com.capstone.smart_parcel.domain.EmailVerification;
-import com.capstone.smart_parcel.domain.VerificationPurpose;
+import com.capstone.smart_parcel.domain.enums.VerificationPurpose;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface EmailVerificationRepository extends JpaRepository<EmailVerification, Long> {
-    Optional<EmailVerification> findTopByEmailAndPurposeOrderByIdDesc(String email, VerificationPurpose purpose);
+    Optional<EmailVerification> findByEmailAndPurpose(String email, VerificationPurpose purpose);
 
     @Modifying
     @Query(value = """
