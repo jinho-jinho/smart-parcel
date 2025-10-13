@@ -1,17 +1,21 @@
+// src/store/auth.store.js
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
-export const authStore = create((set) => ({
-  accessToken: localStorage.getItem("access_token") || "",
-  user: null, // /user/me 결과 캐시 용도
+export const authStore = create(
+  persist(
+    (set) => ({
+      accessToken: null,
+      user: null,
 
-  setAccessToken: (token) => {
-    localStorage.setItem("access_token", token || "");
-    set({ accessToken: token || "" });
-  },
-  setUser: (user) => set({ user }),
-
-  clear: () => {
-    localStorage.removeItem("access_token");
-    set({ accessToken: "", user: null });
-  },
-}));
+      setAccessToken: (token) => set({ accessToken: token || null }),
+      setUser: (user) => set({ user: user || null }),
+      clear: () => set({ accessToken: null, user: null }),
+    }),
+    {
+      name: "sp-auth",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ accessToken: s.accessToken, user: s.user }),
+    }
+  )
+);

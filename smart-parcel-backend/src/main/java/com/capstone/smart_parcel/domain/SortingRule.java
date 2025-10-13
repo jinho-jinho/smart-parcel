@@ -4,6 +4,8 @@ package com.capstone.smart_parcel.domain;
 import com.capstone.smart_parcel.domain.enums.InputType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
 
@@ -25,6 +27,7 @@ public class SortingRule {
     private String ruleName;
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(name="input_type", nullable = false, columnDefinition = "input_type")
     private InputType inputType;
 

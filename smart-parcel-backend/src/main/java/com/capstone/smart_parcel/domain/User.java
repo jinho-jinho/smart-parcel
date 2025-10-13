@@ -4,6 +4,8 @@ package com.capstone.smart_parcel.domain;
 import com.capstone.smart_parcel.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
 
@@ -32,7 +34,8 @@ public class User {
     private String bizNumber; // 옵션
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "user_role")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "role", columnDefinition = "user_role", nullable = false)
     private Role role = Role.STAFF;
 
     @Column(nullable = false)

@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Login.module.css";
-import { login, fetchMe } from "../api/auth.api.js";
+import { login } from "../api/auth";
+import { fetchMe } from "../api/user";
+import { authStore } from "../store/auth.store";
 import icon from "../assets/icon.png";
 
 export default function Login() {
-  const nav = useNavigate();
+  const navigate = useNavigate();
+  const accessToken = authStore((s) => s.accessToken);
+  const user = authStore((s) => s.user);
+
+  useEffect(() => {
+    if (accessToken || user) {
+      navigate("/", { replace: true });
+    }
+  }, [accessToken, user, navigate]);
 
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -24,10 +34,9 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login({ email, password: pw }); // /user/login
-      await fetchMe();                      // 선택: /user/me
-      // TODO: 로그인 후 이동 경로 지정
-      // nav("/dashboard");
+      await login({ email, password: pw }); // 서버가 토큰/쿠키 중 하나 세팅
+      await fetchMe(); // 프로필 불러와 store.user 채움
+      navigate("/", { replace: true });
     } catch (err) {
       setMsg(err?.response?.data?.message || "로그인에 실패했습니다.");
     } finally {
@@ -40,7 +49,6 @@ export default function Login() {
       <main className={styles.center}>
         {/* 로고/브랜드 */}
         <header className={styles.header}>
-          {/* 실제 로고 이미지 쓰면 아래 div 대신 <img className={styles.logoImg} src="/logo.png" alt="Smart Parcel" /> */}
           <img className={styles.logoImg} src={icon} alt="Smart Parcel" />
           <h1 className={styles.brand}>Smart Parcel</h1>
         </header>
@@ -51,7 +59,9 @@ export default function Login() {
 
           {/* 이메일 */}
           <div className={styles.field}>
-            <label htmlFor="email" className={styles.label}>이메일</label>
+            <label htmlFor="email" className={styles.label}>
+              이메일
+            </label>
             <input
               id="email"
               type="email"
@@ -65,7 +75,9 @@ export default function Login() {
 
           {/* 비밀번호 */}
           <div className={styles.field}>
-            <label htmlFor="password" className={styles.label}>비밀번호</label>
+            <label htmlFor="password" className={styles.label}>
+              비밀번호
+            </label>
             <div className={styles.inputWrap}>
               <input
                 id="password"
@@ -88,16 +100,28 @@ export default function Login() {
           </div>
 
           {/* 로그인 */}
-          <button type="submit" className={styles.primary} disabled={loading}>
+          <button
+            type="submit"
+            className={styles.primary}
+            disabled={loading || !emailValid(email) || !pw}
+          >
             {loading ? "로그인 중…" : "로그인"}
           </button>
 
           {/* 링크 */}
           <div className={styles.links}>
-            <button type="button" className={styles.link} onClick={() => nav("/signup")}>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() => navigate("/signup")}
+            >
               회원가입
             </button>
-            <button type="button" className={styles.link} onClick={() => nav("/reset-password")}>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() => navigate("/reset-password")}
+            >
               비밀번호 찾기
             </button>
           </div>

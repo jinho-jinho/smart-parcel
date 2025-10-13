@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { authStore } from "../store/auth.store";
-import { login as apiLogin, logout as apiLogout, fetchMe } from "../api/auth.api";
+import { login as apiLogin, logout as apiLogout } from "../api/auth";
+import { fetchMe } from "../api/user";
 
 export function useAuth() {
   const { accessToken, user } = authStore();

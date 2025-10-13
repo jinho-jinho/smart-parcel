@@ -3,6 +3,8 @@ package com.capstone.smart_parcel.domain;
 import com.capstone.smart_parcel.domain.enums.VerificationPurpose;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 import java.time.OffsetDateTime;
 
@@ -22,7 +24,8 @@ public class EmailVerification {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false, length=32, columnDefinition = "verification_purpose")
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "purpose", columnDefinition = "verification_purpose", nullable = false)
     private VerificationPurpose purpose;
 
     @Column(length = 10, nullable=false)

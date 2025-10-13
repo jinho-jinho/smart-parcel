@@ -1,0 +1,125 @@
+/* src/pages/Groups.module.css (변경 부분 위주) */
+.page {
+  background: #f7f7f8;
+  min-height: 100vh;
+}
+.main {
+  width: min(1200px, 92vw); /* 더 넓은 화면에서 여유 */
+  margin: clamp(16px, 2.4vw, 32px) auto;
+}
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.primary {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #222;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+}
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.secondary {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+.alert {
+  background: #fff3cd;
+  border: 1px solid #ffeeba;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: clamp(12px, 1.6vw, 18px);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+.status {
+  grid-column: 1/2;
+  color: #666;
+  font-size: 14px;
+}
+.dotOn,
+.dotOff {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.dotOn {
+  background: #17c964;
+}
+.dotOff {
+  background: #c7c7c7;
+}
+.title {
+  font-weight: 800;
+  font-size: clamp(16px, 1.3vw, 20px);
+}
+.meta {
+  color: #333;
+  font-size: clamp(13px, 0.95vw, 15px);
+}
+.metaSub {
+  color: #9a9a9a;
+  font-size: clamp(11px, 0.85vw, 13px);
+}
+.more {
+  grid-column: 2/3;
+  justify-self: end;
+  color: #777;
+  font-size: 14px;
+}
+
+/* modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  width: min(520px, 92vw);
+}
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+}
+.textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

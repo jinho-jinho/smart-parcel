@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import styles from "./PasswordReset.module.css";
 import { useNavigate } from "react-router-dom";
-import { sendCode, verifyCode } from "../api/email.api";
-import { resetPassword } from "../api/password.api";
+import { sendCode, verifyCode } from "../api/email-verify";
+import { resetPassword } from "../api/password";
 import icon from "../assets/icon.png";
 
 function fmt(sec) {
