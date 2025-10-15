@@ -14,6 +14,18 @@ public interface SortingGroupRepository extends JpaRepository<SortingGroup, Long
     Page<SortingGroup> findByManager_Id(Long managerId, Pageable pageable);
     Optional<SortingGroup> findByIdAndManager_Id(Long id, Long managerId);
 
+    @Query("""
+            SELECT g
+            FROM SortingGroup g
+            WHERE g.manager.id = :managerId
+              AND (:enabled IS NULL OR g.enabled = :enabled)
+              AND (:keyword IS NULL OR LOWER(g.groupName) LIKE :keyword)
+            """)
+    Page<SortingGroup> searchByManager(@Param("managerId") Long managerId,
+                                       @Param("keyword") String keyword,
+                                       @Param("enabled") Boolean enabled,
+                                       Pageable pageable);
+
     // 현재 활성 그룹 조회(글로벌) 또는 관리자별 필요 시 and manager 조건 추가 버전 별도 생성 가능
     Optional<SortingGroup> findFirstByEnabledTrue();
 

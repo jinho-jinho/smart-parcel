@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import PasswordReset from "./pages/PasswordReset";
 import Groups from "./pages/Groups";
+import Rules from "./pages/Rules";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ROLES } from "./utils/permission";
 import Forbidden from "./pages/Forbidden";
@@ -36,6 +37,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Groups />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/groups/:groupId/rules"
+          element={
+            <ProtectedRoute>
+              <Rules />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups/:groupId/rules"
+          element={
+            <ProtectedRoute roles={[ROLES.MANAGER]}>
+              <Rules />
             </ProtectedRoute>
           }
         />

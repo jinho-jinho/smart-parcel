@@ -14,6 +14,8 @@ public interface RuleChuteRepository extends JpaRepository<RuleChute, Long> {
 
     List<RuleChute> findByChute_Id(Long chuteId);
 
+    List<RuleChute> findByRule_IdIn(Iterable<Long> ruleIds);
+
     @Modifying
     @Query("DELETE FROM RuleChute rc WHERE rc.rule.id = :ruleId AND rc.chute.id = :chuteId")
     int deleteMapping(@Param("ruleId") Long ruleId, @Param("chuteId") Long chuteId);
