@@ -34,21 +34,25 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration cfg = new CorsConfiguration();
+        CorsConfiguration frontCfg = new CorsConfiguration();
         // 개발용 오리진(프론트) 정확히 명시
-        cfg.setAllowedOrigins(List.of(
+        frontCfg.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173"
-                // 필요 시: "http://<내 PC IP>:5173"
+                //"http://<내 PC IP>:5173"
         ));
-        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        cfg.setAllowedHeaders(List.of("*"));
-        cfg.setAllowCredentials(true); // withCredentials=true 사용 시 필수
+        frontCfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        frontCfg.setAllowedHeaders(List.of("*"));
+        frontCfg.setAllowCredentials(true); // withCredentials=true 사용 시 필수
         // 필요하면 노출 헤더 추가
         // cfg.setExposedHeaders(List.of("Set-Cookie"));
+        CorsConfiguration deviceCfg = new CorsConfiguration();
+        deviceCfg.setAllowedMethods(List.of("GET", "POST"));
+        deviceCfg.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cfg);
+        source.registerCorsConfiguration("/api/devices/**", deviceCfg);
+        source.registerCorsConfiguration("/**", frontCfg);
         return source;
     }
 

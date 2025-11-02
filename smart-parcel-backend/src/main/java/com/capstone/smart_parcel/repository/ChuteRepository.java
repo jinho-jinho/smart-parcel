@@ -42,5 +42,5 @@ public interface ChuteRepository extends JpaRepository<Chute, Long> {
                               @Param("groupId") Long groupId,
                               @Param("keyword") String keyword,
                               Pageable pageable);
-    
+
 }
