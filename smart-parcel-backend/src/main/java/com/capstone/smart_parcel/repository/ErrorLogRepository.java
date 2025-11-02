@@ -1,14 +1,16 @@
 package com.capstone.smart_parcel.repository;
 
 import com.capstone.smart_parcel.domain.ErrorLog;
-import com.capstone.smart_parcel.repository.projection.ErrorRateView;
 import com.capstone.smart_parcel.repository.projection.ErrorCodeCountView;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
 
@@ -51,4 +53,46 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
     List<ErrorCodeCountView> errorCountsByCodeAndDateRange(@Param("managerId") Long managerId,
                                                            @Param("start") OffsetDateTime start,
                                                            @Param("end") OffsetDateTime end);
+
+    @Query(
+            value = """
+                    SELECT e
+                    FROM ErrorLog e
+                    WHERE e.manager.id = :managerId
+                      AND (:groupId IS NULL OR e.group.id = :groupId)
+                      AND (:from IS NULL OR e.occurredAt >= :from)
+                      AND (:to IS NULL OR e.occurredAt <= :to)
+                      AND (:logId IS NULL OR e.id = :logId)
+                      AND (
+                          :text IS NULL
+                          OR lower(e.sortingGroupNameSnapshot) LIKE :text
+                          OR lower(e.chuteNameSnapshot) LIKE :text
+                          OR lower(e.errorCode) LIKE :text
+                      )
+                    """,
+            countQuery = """
+                    SELECT COUNT(e)
+                    FROM ErrorLog e
+                    WHERE e.manager.id = :managerId
+                      AND (:groupId IS NULL OR e.group.id = :groupId)
+                      AND (:from IS NULL OR e.occurredAt >= :from)
+                      AND (:to IS NULL OR e.occurredAt <= :to)
+                      AND (:logId IS NULL OR e.id = :logId)
+                      AND (
+                          :text IS NULL
+                          OR lower(e.sortingGroupNameSnapshot) LIKE :text
+                          OR lower(e.chuteNameSnapshot) LIKE :text
+                          OR lower(e.errorCode) LIKE :text
+                      )
+                    """
+    )
+    Page<ErrorLog> searchHistory(@Param("managerId") Long managerId,
+                                 @Param("groupId") Long groupId,
+                                 @Param("from") OffsetDateTime from,
+                                 @Param("to") OffsetDateTime to,
+                                 @Param("logId") Long logId,
+                                 @Param("text") String text,
+                                 Pageable pageable);
+
+    Optional<ErrorLog> findByIdAndManager_Id(Long id, Long managerId);
 }

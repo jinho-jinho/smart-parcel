@@ -3,12 +3,15 @@ package com.capstone.smart_parcel.repository;
 import com.capstone.smart_parcel.domain.SortingHistory;
 import com.capstone.smart_parcel.repository.projection.DailyCountView;
 import com.capstone.smart_parcel.repository.projection.LineCountView;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SortingHistoryRepository extends JpaRepository<SortingHistory, Long> {
 
@@ -58,4 +61,44 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
     Long totalProcessedByManagerAndDateRange(@Param("managerId") Long managerId,
                                              @Param("start") OffsetDateTime start,
                                              @Param("end") OffsetDateTime end);
+
+    @Query(
+            value = """
+                    SELECT sh
+                    FROM SortingHistory sh
+                    WHERE sh.manager.id = :managerId
+                      AND (:groupId IS NULL OR sh.group.id = :groupId)
+                      AND (:from IS NULL OR sh.processedAt >= :from)
+                      AND (:to IS NULL OR sh.processedAt <= :to)
+                      AND (:historyId IS NULL OR sh.id = :historyId)
+                      AND (
+                          :text IS NULL
+                          OR lower(sh.sortingGroupNameSnapshot) LIKE :text
+                          OR lower(sh.chuteNameSnapshot) LIKE :text
+                      )
+                    """,
+            countQuery = """
+                    SELECT COUNT(sh)
+                    FROM SortingHistory sh
+                    WHERE sh.manager.id = :managerId
+                      AND (:groupId IS NULL OR sh.group.id = :groupId)
+                      AND (:from IS NULL OR sh.processedAt >= :from)
+                      AND (:to IS NULL OR sh.processedAt <= :to)
+                      AND (:historyId IS NULL OR sh.id = :historyId)
+                      AND (
+                          :text IS NULL
+                          OR lower(sh.sortingGroupNameSnapshot) LIKE :text
+                          OR lower(sh.chuteNameSnapshot) LIKE :text
+                      )
+                    """
+    )
+    Page<SortingHistory> searchHistory(@Param("managerId") Long managerId,
+                                       @Param("groupId") Long groupId,
+                                       @Param("from") OffsetDateTime from,
+                                       @Param("to") OffsetDateTime to,
+                                       @Param("historyId") Long historyId,
+                                       @Param("text") String text,
+                                       Pageable pageable);
+
+    Optional<SortingHistory> findByIdAndManager_Id(Long id, Long managerId);
 }
