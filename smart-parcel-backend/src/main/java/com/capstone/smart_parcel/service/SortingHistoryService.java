@@ -5,6 +5,7 @@ import com.capstone.smart_parcel.dto.common.PageResponse;
 import com.capstone.smart_parcel.dto.history.SortingHistoryDetailResponse;
 import com.capstone.smart_parcel.dto.history.SortingHistorySummaryResponse;
 import com.capstone.smart_parcel.repository.SortingHistoryRepository;
+import com.capstone.smart_parcel.service.support.ImageUrlResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ public class SortingHistoryService {
 
     private final SortingHistoryRepository sortingHistoryRepository;
     private final SortingContextService sortingContextService;
+    private final ImageUrlResolver imageUrlResolver;
 
     @Transactional(readOnly = true)
     public PageResponse<SortingHistorySummaryResponse> getHistory(String email,
@@ -51,7 +53,7 @@ public class SortingHistoryService {
         var ctx = sortingContextService.resolve(email);
         SortingHistory history = sortingHistoryRepository.findByIdAndManager_Id(historyId, ctx.manager().getId())
                 .orElseThrow(() -> new NoSuchElementException("분류 이력을 찾을 수 없습니다."));
-        return SortingHistoryDetailResponse.from(history);
+        return SortingHistoryDetailResponse.from(history, imageUrlResolver.bundle(history.getImageUrl()));
     }
 
     private Range normalizeRange(OffsetDateTime from, OffsetDateTime to) {

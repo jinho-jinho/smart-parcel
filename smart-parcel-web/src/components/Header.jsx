@@ -1,30 +1,31 @@
-﻿import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import { authStore } from "../store/auth.store";
 import { isManager } from "../utils/permission";
 import { logout as apiLogout } from "../api/auth";
-import { useNavigate } from "react-router-dom";
 import logo from "../assets/icon.png";
 
 export default function Header() {
-  // Header.jsx
-  const user = authStore((s) => s.user);
-  const clear = authStore((s) => s.clear);
+  const user = authStore((state) => state.user);
+  const clear = authStore((state) => state.clear);
 
-  const nav = useNavigate();
-  const loc = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const admin = isManager(user);
 
-  const onLogout = async (e) => {
-    e.preventDefault();
+  const onLogout = async (event) => {
+    event.preventDefault();
     try {
       await apiLogout();
     } finally {
       clear();
-      nav("/login", { replace: true });
+      navigate("/login", { replace: true });
     }
   };
+
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <header className={styles.wrap}>
@@ -36,51 +37,37 @@ export default function Header() {
       </div>
 
       <nav className={styles.nav}>
-        <Link
-          className={loc.pathname === "/history" ? styles.active : ""}
-          to="/history"
-        >
-          History
+        <Link className={isActive("/history") ? styles.active : ""} to="/history">
+          분류 이력
         </Link>
-        <Link
-          className={loc.pathname === "/errors" ? styles.active : ""}
-          to="/errors"
-        >
-          Errors
+        <Link className={isActive("/errors") ? styles.active : ""} to="/errors">
+          오류 이력
         </Link>
-        <Link
-          className={loc.pathname === "/stats" ? styles.active : ""}
-          to="/stats"
-        >
-          Stats
+        <Link className={isActive("/stats") ? styles.active : ""} to="/stats">
+          통계 대시보드
         </Link>
-
         {admin && (
-          <>
-            <Link
-              className={loc.pathname === "/admin/groups" ? styles.active : ""}
-              to="/admin/groups"
-            >
-              Admin
-            </Link>
-          </>
+          <Link
+            className={isActive("/admin") ? styles.active : ""}
+            to="/admin/groups"
+          >
+            관리자 메뉴
+          </Link>
         )}
-
-        <Link className={loc.pathname === "/me" ? styles.active : ""} to="/me">
-          Profile
+        <Link className={isActive("/me") ? styles.active : ""} to="/me">
+          내 정보
         </Link>
       </nav>
 
       <div className={styles.right}>
-        <Link to="/notifications" aria-label="Notifications">
-          *
-        </Link>
+        <span aria-label="알림" role="img">
+          🔔
+        </span>
         <a href="/logout" onClick={onLogout} className={styles.btn}>
-          Logout
+          로그아웃
         </a>
         <span className={styles.user}>{user?.name || "User"}</span>
       </div>
     </header>
   );
 }
-

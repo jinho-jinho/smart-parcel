@@ -4,6 +4,8 @@ import SignUp from "./pages/SignUp";
 import PasswordReset from "./pages/PasswordReset";
 import Groups from "./pages/Groups";
 import Rules from "./pages/Rules";
+import SortingHistory from "./pages/SortingHistory";
+import ErrorHistory from "./pages/ErrorHistory";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ROLES } from "./utils/permission";
 import Forbidden from "./pages/Forbidden";
@@ -17,6 +19,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Groups />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <SortingHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/errors"
+          element={
+            <ProtectedRoute>
+              <ErrorHistory />
             </ProtectedRoute>
           }
         />

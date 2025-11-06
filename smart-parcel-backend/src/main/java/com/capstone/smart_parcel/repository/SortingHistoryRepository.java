@@ -68,9 +68,9 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
                     FROM SortingHistory sh
                     WHERE sh.manager.id = :managerId
                       AND (:groupId IS NULL OR sh.group.id = :groupId)
-                      AND (:from IS NULL OR sh.processedAt >= :from)
-                      AND (:to IS NULL OR sh.processedAt <= :to)
-                      AND (:historyId IS NULL OR sh.id = :historyId)
+                      AND sh.processedAt >= COALESCE(:from, sh.processedAt)
+                      AND sh.processedAt <= COALESCE(:to, sh.processedAt)
+                      AND sh.id = COALESCE(:historyId, sh.id)
                       AND (
                           :text IS NULL
                           OR lower(sh.sortingGroupNameSnapshot) LIKE :text
@@ -82,9 +82,9 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
                     FROM SortingHistory sh
                     WHERE sh.manager.id = :managerId
                       AND (:groupId IS NULL OR sh.group.id = :groupId)
-                      AND (:from IS NULL OR sh.processedAt >= :from)
-                      AND (:to IS NULL OR sh.processedAt <= :to)
-                      AND (:historyId IS NULL OR sh.id = :historyId)
+                      AND sh.processedAt >= COALESCE(:from, sh.processedAt)
+                      AND sh.processedAt <= COALESCE(:to, sh.processedAt)
+                      AND sh.id = COALESCE(:historyId, sh.id)
                       AND (
                           :text IS NULL
                           OR lower(sh.sortingGroupNameSnapshot) LIKE :text

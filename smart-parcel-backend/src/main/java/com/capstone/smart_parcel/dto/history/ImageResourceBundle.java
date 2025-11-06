@@ -13,7 +13,7 @@ public record ImageResourceBundle(
         if (baseUrl == null || baseUrl.isBlank()) {
             return new ImageResourceBundle(null, null, null);
         }
-        return new ImageResourceBundle(baseUrl, baseUrl, baseUrl);
+        return new ImageResourceBundle(baseUrl, null, null);
     }
 
     public static ImageResourceBundle of(String original, String thumbnail, String snapshot) {

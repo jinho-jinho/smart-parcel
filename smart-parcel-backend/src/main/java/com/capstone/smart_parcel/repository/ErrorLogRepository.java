@@ -21,21 +21,21 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
 
     // 오류율(Projection 하나로)
     @Query("""
-  SELECT COUNT(e)
-  FROM ErrorLog e
-  WHERE e.occurredAt >= :start AND e.occurredAt < :end
-    AND e.manager.id = :managerId
-""")
+      SELECT COUNT(e)
+      FROM ErrorLog e
+      WHERE e.occurredAt >= :start AND e.occurredAt < :end
+        AND e.manager.id = :managerId
+    """)
     Long totalErrorsByManagerAndDateRange(@Param("managerId") Long managerId,
                                           @Param("start") java.time.OffsetDateTime start,
                                           @Param("end")   java.time.OffsetDateTime end);
 
     @Query("""
-  SELECT COUNT(sh)
-  FROM SortingHistory sh
-  WHERE sh.processedAt >= :start AND sh.processedAt < :end
-    AND sh.manager.id = :managerId
-""")
+      SELECT COUNT(sh)
+      FROM SortingHistory sh
+      WHERE sh.processedAt >= :start AND sh.processedAt < :end
+        AND sh.manager.id = :managerId
+    """)
     Long totalProcessedByManagerAndDateRange(@Param("managerId") Long managerId,
                                              @Param("start") java.time.OffsetDateTime start,
                                              @Param("end")   java.time.OffsetDateTime end);
@@ -60,8 +60,8 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
                     FROM ErrorLog e
                     WHERE e.manager.id = :managerId
                       AND (:groupId IS NULL OR e.group.id = :groupId)
-                      AND (:from IS NULL OR e.occurredAt >= :from)
-                      AND (:to IS NULL OR e.occurredAt <= :to)
+                      AND e.occurredAt >= COALESCE(:from, e.occurredAt)
+                      AND e.occurredAt <= COALESCE(:to, e.occurredAt)
                       AND (:logId IS NULL OR e.id = :logId)
                       AND (
                           :text IS NULL
@@ -75,8 +75,8 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
                     FROM ErrorLog e
                     WHERE e.manager.id = :managerId
                       AND (:groupId IS NULL OR e.group.id = :groupId)
-                      AND (:from IS NULL OR e.occurredAt >= :from)
-                      AND (:to IS NULL OR e.occurredAt <= :to)
+                      AND e.occurredAt >= COALESCE(:from, e.occurredAt)
+                      AND e.occurredAt <= COALESCE(:to, e.occurredAt)
                       AND (:logId IS NULL OR e.id = :logId)
                       AND (
                           :text IS NULL

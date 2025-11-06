@@ -5,6 +5,7 @@ import com.capstone.smart_parcel.dto.common.PageResponse;
 import com.capstone.smart_parcel.dto.history.ErrorHistoryDetailResponse;
 import com.capstone.smart_parcel.dto.history.ErrorHistorySummaryResponse;
 import com.capstone.smart_parcel.repository.ErrorLogRepository;
+import com.capstone.smart_parcel.service.support.ImageUrlResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ public class ErrorHistoryService {
 
     private final ErrorLogRepository errorLogRepository;
     private final SortingContextService sortingContextService;
+    private final ImageUrlResolver imageUrlResolver;
 
     @Transactional(readOnly = true)
     public PageResponse<ErrorHistorySummaryResponse> getHistory(String email,
@@ -51,7 +53,7 @@ public class ErrorHistoryService {
         var ctx = sortingContextService.resolve(email);
         ErrorLog errorLog = errorLogRepository.findByIdAndManager_Id(historyId, ctx.manager().getId())
                 .orElseThrow(() -> new NoSuchElementException("오류 이력을 찾을 수 없습니다."));
-        return ErrorHistoryDetailResponse.from(errorLog);
+        return ErrorHistoryDetailResponse.from(errorLog, imageUrlResolver.bundle(errorLog.getImageUrl()));
     }
 
     private Range normalizeRange(OffsetDateTime from, OffsetDateTime to) {

@@ -14,13 +14,17 @@ public record ErrorHistoryDetailResponse(
 ) {
 
     public static ErrorHistoryDetailResponse from(ErrorLog errorLog) {
+        return from(errorLog, ImageResourceBundle.single(errorLog.getImageUrl()));
+    }
+
+    public static ErrorHistoryDetailResponse from(ErrorLog errorLog, ImageResourceBundle images) {
         return new ErrorHistoryDetailResponse(
                 errorLog.getId(),
                 errorLog.getSortingGroupNameSnapshot(),
                 errorLog.getChuteNameSnapshot(),
                 errorLog.getErrorCode(),
                 errorLog.getOccurredAt(),
-                ImageResourceBundle.single(errorLog.getImageUrl())
+                images
         );
     }
 }

@@ -13,12 +13,16 @@ public record SortingHistoryDetailResponse(
 ) {
 
     public static SortingHistoryDetailResponse from(SortingHistory history) {
+        return from(history, ImageResourceBundle.single(history.getImageUrl()));
+    }
+
+    public static SortingHistoryDetailResponse from(SortingHistory history, ImageResourceBundle images) {
         return new SortingHistoryDetailResponse(
                 history.getId(),
                 history.getSortingGroupNameSnapshot(),
                 history.getChuteNameSnapshot(),
                 history.getProcessedAt(),
-                ImageResourceBundle.single(history.getImageUrl())
+                images
         );
     }
 }
