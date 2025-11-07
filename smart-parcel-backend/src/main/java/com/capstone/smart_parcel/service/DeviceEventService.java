@@ -43,6 +43,7 @@ public class DeviceEventService {
     private final SortingHistoryRepository sortingHistoryRepository;
     private final ErrorLogRepository errorLogRepository;
     private final ImageStorageService imageStorageService;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public DeviceSetupResponse fetchSetup(Long managerId) {
@@ -146,6 +147,7 @@ public class DeviceEventService {
                 .build();
 
         errorLogRepository.save(errorLog);
+        notificationService.notifyError(errorLog);
         return errorLog.getId();
     }
 

@@ -117,4 +117,6 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
                                        Pageable pageable);
 
     Optional<SortingHistory> findByIdAndManager_Id(Long id, Long managerId);
+
+    boolean existsByChute_Id(Long chuteId);
 }

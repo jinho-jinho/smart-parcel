@@ -1,6 +1,7 @@
-﻿import React from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
+import NotificationBell from "./NotificationBell";
 import { authStore } from "../store/auth.store";
 import { isManager } from "../utils/permission";
 import { logout as apiLogout } from "../api/auth";
@@ -65,6 +66,7 @@ export default function Header() {
       </nav>
 
       <div className={styles.right}>
+        <NotificationBell />
         <span aria-label="wave" role="img">
           👋
         </span>

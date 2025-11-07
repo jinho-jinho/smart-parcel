@@ -7,6 +7,7 @@ import com.capstone.smart_parcel.dto.sorting.ChuteCreateRequest;
 import com.capstone.smart_parcel.dto.sorting.ChuteResponse;
 import com.capstone.smart_parcel.dto.sorting.ChuteUpdateRequest;
 import com.capstone.smart_parcel.repository.ChuteRepository;
+import com.capstone.smart_parcel.repository.RuleChuteRepository;
 import com.capstone.smart_parcel.repository.SortingGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ public class ChuteService {
 
     private final ChuteRepository chuteRepository;
     private final SortingGroupRepository sortingGroupRepository;
+    private final RuleChuteRepository ruleChuteRepository;
     private final SortingContextService sortingContextService;
 
     @Transactional(readOnly = true)
@@ -113,6 +115,7 @@ public class ChuteService {
         Chute chute = chuteRepository.findById(chuteId)
                 .orElseThrow(() -> new NoSuchElementException("Chute not found."));
 
+        ruleChuteRepository.deleteAllByChuteId(chuteId);
         chuteRepository.delete(chute);
     }
 

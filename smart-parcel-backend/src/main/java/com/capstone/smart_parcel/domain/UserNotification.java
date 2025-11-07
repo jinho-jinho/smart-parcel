@@ -20,7 +20,7 @@ public class UserNotification {
     private Long id;
 
     @Column(name="created_at", nullable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
 
     @Column(name="is_read", nullable = false)
     private boolean isRead = false;
@@ -34,4 +34,10 @@ public class UserNotification {
     @JoinColumn(name = "recipient_user_id",
             foreignKey = @ForeignKey(name = "fk_un_recipient"))
     private User recipient;
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
 }

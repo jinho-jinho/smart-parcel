@@ -192,13 +192,15 @@ export default function Rules() {
   };
 
   const handleEditRule = (rule) => {
+    const chuteList = Array.isArray(rule.chutes) ? rule.chutes.filter(Boolean) : [];
+    const limited = chuteList.slice(0, 1);
     setRuleForm({
       ruleName: rule.ruleName ?? rule.name ?? "",
       itemName: rule.itemName ?? "",
       inputType: rule.inputType ?? "TEXT",
       inputValue: rule.inputValue ?? "",
-      chuteIds: Array.isArray(rule.chutes) ? rule.chutes.map((item) => item.id) : [],
-      selectedChutes: Array.isArray(rule.chutes) ? rule.chutes : [],
+      chuteIds: limited.map((item) => item.id),
+      selectedChutes: limited,
     });
     setEditingRule(rule);
     setRuleError("");
@@ -286,7 +288,8 @@ export default function Rules() {
 
   const openChuteModal = async (mode, initialSelection = []) => {
     setChuteMode(mode);
-    setChuteSelection(Array.from(new Set(initialSelection)));
+    const firstSelected = initialSelection.find((id) => id != null);
+    setChuteSelection(firstSelected ? [firstSelected] : []);
     setChuteError("");
     await ensureChutesLoaded();
     setShowChuteModal(true);
@@ -326,10 +329,7 @@ export default function Rules() {
       setChuteForm(DEFAULT_CHUTE_FORM);
       await loadChutes();
       if (created?.id && chuteMode === "select") {
-        setChuteSelection((prev) => {
-          if (prev.includes(created.id)) return prev;
-          return [...prev, created.id];
-        });
+        setChuteSelection([created.id]);
       }
     } catch (err) {
       console.error(err);
@@ -340,13 +340,12 @@ export default function Rules() {
   };
 
   const handleConfirmChuteSelection = () => {
-    const details = chuteSelection
-      .map((id) => combinedChuteLookup.get(id))
-      .filter(Boolean);
+    const selectedId = chuteSelection[0];
+    const detail = selectedId ? combinedChuteLookup.get(selectedId) : null;
     setRuleForm((prev) => ({
       ...prev,
-      chuteIds: chuteSelection,
-      selectedChutes: details,
+      chuteIds: selectedId ? [selectedId] : [],
+      selectedChutes: detail ? [detail] : [],
     }));
     closeChuteModal();
   };
@@ -683,26 +682,18 @@ export default function Rules() {
                     const checked = chuteSelection.includes(chute.id);
                     return (
                       <li key={chute.id} className={styles.chuteItem}>
-                        {chuteMode === "select" ? (
-                          <label className={styles.checkboxRow}>
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={(event) => {
-                                setChuteSelection((prev) => {
-                                  if (event.target.checked) {
-                                    if (prev.includes(chute.id)) return prev;
-                                    return [...prev, chute.id];
-                                  }
-                                  return prev.filter((id) => id !== chute.id);
-                                });
-                              }}
-                            />
-                            <span>
-                              {chute.name || chute.chuteName}
-                              <span className={styles.chuteItemAngle}>
-                                {chute.angle ?? chute.servoDeg}°
-                              </span>
+                          {chuteMode === "select" ? (
+                            <label className={styles.checkboxRow}>
+                              <input
+                                type="radio"
+                                checked={checked}
+                                onChange={() => setChuteSelection([chute.id])}
+                              />
+                              <span>
+                                {chute.name || chute.chuteName}
+                                <span className={styles.chuteItemAngle}>
+                                  {chute.angle ?? chute.servoDeg}°
+                                </span>
                             </span>
                           </label>
                         ) : (
@@ -779,7 +770,12 @@ export default function Rules() {
                 닫기
               </button>
               {chuteMode === "select" && (
-                <button type="button" className={styles.primary} onClick={handleConfirmChuteSelection}>
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={handleConfirmChuteSelection}
+                  disabled={chuteSelection.length === 0}
+                >
                   선택 완료
                 </button>
               )}

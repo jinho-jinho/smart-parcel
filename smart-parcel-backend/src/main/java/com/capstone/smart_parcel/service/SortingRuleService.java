@@ -245,9 +245,13 @@ public class SortingRuleService {
         if (chuteIds == null) {
             return List.of();
         }
-        return chuteIds.stream()
+        List<Long> normalized = chuteIds.stream()
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
+        if (normalized.size() > 1) {
+            throw new IllegalArgumentException("각 분류 규칙에는 하나의 분류 라인만 지정할 수 있습니다.");
+        }
+        return normalized;
     }
 }

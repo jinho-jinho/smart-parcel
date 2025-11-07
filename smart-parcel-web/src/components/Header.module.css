@@ -48,3 +48,95 @@
   color: #555;
   font-size: clamp(12px, 0.95vw, 14px);
 }
+
+.notifyWrap {
+  position: relative;
+}
+
+.notifyButton {
+  position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.notifyBadge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #dc2626;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.notifyDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 260px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.15);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.notifyHeader {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+}
+
+.notifyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.notifyItem {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.notifyItem:hover {
+  background: #f8fafc;
+}
+
+.notifyTitle {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
+
+.notifyMeta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.notifyPlaceholder {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.notifyFooter {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: #9ca3af;
+  border-top: 1px solid #f1f5f9;
+}

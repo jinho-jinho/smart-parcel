@@ -113,8 +113,8 @@ CREATE TABLE sorting_history (
 
     -- 기준 FK
                                  manager_id BIGINT NOT NULL,
-                                 group_id   BIGINT NOT NULL,
-                                 chute_id   BIGINT NOT NULL,
+                                 group_id   BIGINT,
+                                 chute_id   BIGINT,
 
                                  CONSTRAINT fk_hist_manager FOREIGN KEY (manager_id) REFERENCES users(id)          ON DELETE SET NULL,
                                  CONSTRAINT fk_hist_group   FOREIGN KEY (group_id)   REFERENCES sorting_groups(id) ON DELETE SET NULL,
