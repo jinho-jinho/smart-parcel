@@ -1,0 +1,151 @@
+.page {
+  background: #f7f7f8;
+  min-height: 100vh;
+}
+
+.main {
+  width: min(1100px, 92vw);
+  margin: clamp(16px, 2.4vw, 32px) auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 30px);
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.searchForm {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 0 12px;
+  min-width: 220px;
+}
+
+.search:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.primary {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 18px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: flex-end;
+  color: #4b5563;
+  margin-bottom: 10px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  padding: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #d1d5db;
+  color: #111827;
+}
+
+.table td {
+  padding: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1f2937;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.placeholder {
+  text-align: center;
+  padding: 40px 0;
+  color: #9ca3af;
+}
+
+.danger {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.secondary {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+}
+
+.error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+@media (max-width: 640px) {
+  .table th,
+  .table td {
+    padding: 10px 8px;
+  }
+}

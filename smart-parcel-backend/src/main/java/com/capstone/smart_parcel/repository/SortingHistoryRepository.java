@@ -2,6 +2,7 @@ package com.capstone.smart_parcel.repository;
 
 import com.capstone.smart_parcel.domain.SortingHistory;
 import com.capstone.smart_parcel.repository.projection.DailyCountView;
+import com.capstone.smart_parcel.repository.projection.GroupProcessingCountView;
 import com.capstone.smart_parcel.repository.projection.LineCountView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,10 +29,12 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
            FROM SortingHistory sh
            WHERE sh.processedAt BETWEEN :start AND :end
              AND sh.manager.id = :managerId
+             AND (:groupId IS NULL OR sh.group.id = :groupId)
            GROUP BY sh.chuteNameSnapshot
            ORDER BY total DESC
            """)
     List<LineCountView> lineCountsByManagerAndDateRange(@Param("managerId") Long managerId,
+                                                        @Param("groupId") Long groupId,
                                                         @Param("start") OffsetDateTime start,
                                                         @Param("end") OffsetDateTime end);
 
@@ -46,6 +49,7 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
 """)
     List<DailyCountView> dailyCountsByManagerAndDateRange(
             @Param("managerId") Long managerId,
+            @Param("groupId") Long groupId,
             @Param("start") java.time.OffsetDateTime start,
             @Param("end")   java.time.OffsetDateTime end
     );
@@ -57,10 +61,22 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
            FROM SortingHistory sh
            WHERE sh.processedAt BETWEEN :start AND :end
              AND sh.manager.id = :managerId
+             AND (:groupId IS NULL OR sh.group.id = :groupId)
            """)
     Long totalProcessedByManagerAndDateRange(@Param("managerId") Long managerId,
+                                             @Param("groupId") Long groupId,
                                              @Param("start") OffsetDateTime start,
                                              @Param("end") OffsetDateTime end);
+
+    @Query("""
+            SELECT sh.group.id AS groupId, COUNT(sh) AS total
+            FROM SortingHistory sh
+            WHERE sh.manager.id = :managerId
+              AND sh.group.id IN :groupIds
+            GROUP BY sh.group.id
+            """)
+    List<GroupProcessingCountView> countByGroupIds(@Param("managerId") Long managerId,
+                                                   @Param("groupIds") List<Long> groupIds);
 
     @Query(
             value = """

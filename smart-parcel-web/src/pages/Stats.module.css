@@ -1,0 +1,392 @@
+.page {
+  background: #f7f7f8;
+  min-height: 100vh;
+}
+
+.main {
+  width: min(1200px, 92vw);
+  margin: clamp(16px, 2.4vw, 32px) auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.heading {
+  margin: 0;
+  font-size: clamp(24px, 2.6vw, 30px);
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(209, 213, 219, 0.7);
+  padding: 18px;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.08);
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.filterField input,
+.filterField select {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  height: 38px;
+  padding: 0 10px;
+}
+
+.filterField input:focus,
+.filterField select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.filterActions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.filterActions button {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 38px;
+  cursor: pointer;
+}
+
+.filterActions button:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.primary {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.primary:hover {
+  background: #111;
+  border-color: #111;
+}
+
+.filterActions button.applyButton {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.filterActions button.applyButton:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.card {
+  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  border-radius: 24px;
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.cardHeader {
+  margin-bottom: 10px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.cardBody {
+  flex: 1;
+  min-height: 220px;
+  display: block;
+}
+
+.chartArea {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.centerY {
+  align-items: center;
+}
+
+.bottomAlign {
+  align-items: flex-end;
+}
+
+.scrollY {
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.scrollX {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.placeholder {
+  color: #9ca3af;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.hBarList {
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hBarList li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hBarLabel {
+  min-width: 90px;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.hBarTrack {
+  flex: 1;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hBarValue {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.hBarCount {
+  min-width: 48px;
+  text-align: right;
+  color: #111827;
+  font-weight: 700;
+}
+
+.vChart {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  min-height: 220px;
+}
+
+.vBarWrapper {
+  flex: 0 0 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.vBarTrack {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: flex-end;
+}
+
+.vBarValue {
+  width: 100%;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(180deg, #4c5565, #111827);
+}
+
+.vBarCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.vBarLabel {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pieWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.pie {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  position: relative;
+  background: conic-gradient(#d1d5db 0% 100%);
+  box-shadow: inset 0 0 20px rgba(15, 23, 42, 0.08);
+}
+
+.pieRing {
+  width: 200px;
+  height: 200px;
+}
+
+.pieCenter {
+  position: absolute;
+  inset: 40px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  color: #111827;
+  font-weight: 700;
+  padding: 8px;
+}
+
+.pieRing .pieCenter {
+  inset: 55px;
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-flex;
+}
+
+.legendLabel {
+  flex: 1;
+  color: #374151;
+}
+
+.legendCount {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.rateWrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rateStats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 140px;
+}
+
+.metricLabel {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vChart {
+    min-height: 160px;
+  }
+
+  .cardBody {
+    min-height: 150px;
+  }
+
+  .rateWrap {
+    flex-direction: column;
+    align-items: center;
+  }
+}

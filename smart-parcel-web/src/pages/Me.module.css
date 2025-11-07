@@ -1,0 +1,81 @@
+.page {
+  background: #f7f7f8;
+  min-height: 100vh;
+}
+
+.main {
+  width: min(720px, 92vw);
+  margin: clamp(16px, 2.4vw, 32px) auto;
+}
+
+.card {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 24px;
+}
+
+.placeholder {
+  color: #6b7280;
+}
+
+.error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.list div {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.list dt {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.list dd {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.primary {
+  align-self: flex-start;
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: none;
+  background: #111827;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background: #1f2937;
+}

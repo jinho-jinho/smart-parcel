@@ -6,6 +6,9 @@ import Groups from "./pages/Groups";
 import Rules from "./pages/Rules";
 import SortingHistory from "./pages/SortingHistory";
 import ErrorHistory from "./pages/ErrorHistory";
+import Stats from "./pages/Stats";
+import StaffManagement from "./pages/StaffManagement";
+import Me from "./pages/Me";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ROLES } from "./utils/permission";
 import Forbidden from "./pages/Forbidden";
@@ -38,6 +41,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Stats />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/reset-password" element={<PasswordReset />} />
@@ -47,6 +58,22 @@ export default function App() {
           element={
             <ProtectedRoute roles={[ROLES.MANAGER]}>
               <Groups />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/staff"
+          element={
+            <ProtectedRoute roles={[ROLES.MANAGER]}>
+              <StaffManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/me"
+          element={
+            <ProtectedRoute>
+              <Me />
             </ProtectedRoute>
           }
         />

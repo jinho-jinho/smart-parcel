@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import { authStore } from "../store/auth.store";
@@ -37,7 +37,10 @@ export default function Header() {
       </div>
 
       <nav className={styles.nav}>
-        <Link className={isActive("/history") ? styles.active : ""} to="/history">
+        <Link
+          className={isActive("/history") ? styles.active : ""}
+          to="/history"
+        >
           분류 이력
         </Link>
         <Link className={isActive("/errors") ? styles.active : ""} to="/errors">
@@ -47,12 +50,14 @@ export default function Header() {
           통계 대시보드
         </Link>
         {admin && (
-          <Link
-            className={isActive("/admin") ? styles.active : ""}
-            to="/admin/groups"
-          >
-            관리자 메뉴
-          </Link>
+          <>
+            <Link
+              className={isActive("/admin/staff") ? styles.active : ""}
+              to="/admin/staff"
+            >
+              직원 관리
+            </Link>
+          </>
         )}
         <Link className={isActive("/me") ? styles.active : ""} to="/me">
           내 정보
@@ -60,8 +65,8 @@ export default function Header() {
       </nav>
 
       <div className={styles.right}>
-        <span aria-label="알림" role="img">
-          🔔
+        <span aria-label="wave" role="img">
+          👋
         </span>
         <a href="/logout" onClick={onLogout} className={styles.btn}>
           로그아웃

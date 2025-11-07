@@ -4,6 +4,8 @@ import com.capstone.smart_parcel.domain.SortingGroup;
 import com.capstone.smart_parcel.dto.common.PageResponse;
 import com.capstone.smart_parcel.dto.sorting.*;
 import com.capstone.smart_parcel.repository.SortingGroupRepository;
+import com.capstone.smart_parcel.repository.SortingHistoryRepository;
+import com.capstone.smart_parcel.repository.projection.GroupProcessingCountView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +13,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SortingGroupService {
 
     private final SortingGroupRepository sortingGroupRepository;
+    private final SortingHistoryRepository sortingHistoryRepository;
     private final SortingContextService sortingContextService;
 
     @Transactional(readOnly = true)
@@ -32,7 +38,10 @@ public class SortingGroupService {
                 enabled,
                 pageable
         );
-        return PageResponse.of(page, SortingGroupResponse::from);
+        var counts = fetchProcessingCounts(ctx.manager().getId(), page.getContent());
+
+        return PageResponse.of(page, group ->
+                SortingGroupResponse.from(group, counts.getOrDefault(group.getId(), 0L)));
     }
 
     @Transactional
@@ -107,5 +116,18 @@ public class SortingGroupService {
         String v = keyword.trim();
         if (v.isEmpty()) return null;
         return v.toLowerCase(Locale.ROOT);
+    }
+
+    private Map<Long, Long> fetchProcessingCounts(Long managerId, List<SortingGroup> groups) {
+        if (groups.isEmpty()) {
+            return Map.of();
+        }
+        List<Long> groupIds = groups.stream()
+                .map(SortingGroup::getId)
+                .toList();
+
+        List<GroupProcessingCountView> views = sortingHistoryRepository.countByGroupIds(managerId, groupIds);
+        return views.stream()
+                .collect(Collectors.toMap(GroupProcessingCountView::getGroupId, GroupProcessingCountView::getTotal));
     }
 }

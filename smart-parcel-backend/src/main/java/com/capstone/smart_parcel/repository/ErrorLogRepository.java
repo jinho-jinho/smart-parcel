@@ -25,8 +25,10 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
       FROM ErrorLog e
       WHERE e.occurredAt >= :start AND e.occurredAt < :end
         AND e.manager.id = :managerId
+        AND (:groupId IS NULL OR e.group.id = :groupId)
     """)
     Long totalErrorsByManagerAndDateRange(@Param("managerId") Long managerId,
+                                          @Param("groupId") Long groupId,
                                           @Param("start") java.time.OffsetDateTime start,
                                           @Param("end")   java.time.OffsetDateTime end);
 
@@ -35,8 +37,10 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
       FROM SortingHistory sh
       WHERE sh.processedAt >= :start AND sh.processedAt < :end
         AND sh.manager.id = :managerId
+        AND (:groupId IS NULL OR sh.group.id = :groupId)
     """)
     Long totalProcessedByManagerAndDateRange(@Param("managerId") Long managerId,
+                                             @Param("groupId") Long groupId,
                                              @Param("start") java.time.OffsetDateTime start,
                                              @Param("end")   java.time.OffsetDateTime end);
 
@@ -47,10 +51,12 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long> {
            FROM ErrorLog e
            WHERE e.occurredAt BETWEEN :start AND :end
              AND e.manager.id = :managerId
+             AND (:groupId IS NULL OR e.group.id = :groupId)
            GROUP BY e.errorCode
            ORDER BY total DESC
            """)
     List<ErrorCodeCountView> errorCountsByCodeAndDateRange(@Param("managerId") Long managerId,
+                                                           @Param("groupId") Long groupId,
                                                            @Param("start") OffsetDateTime start,
                                                            @Param("end") OffsetDateTime end);
 
