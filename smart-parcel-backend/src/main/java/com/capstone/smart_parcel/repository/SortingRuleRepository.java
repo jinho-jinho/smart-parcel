@@ -4,13 +4,15 @@ import com.capstone.smart_parcel.domain.SortingRule;
 import com.capstone.smart_parcel.domain.enums.InputType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 public interface SortingRuleRepository extends JpaRepository<SortingRule, Long> {
 
-    // 그룹 내 기준 목록 / 검색
-    Page<SortingRule> findByGroup_Id(Long groupId, Pageable pageable);
+    List<SortingRule> findByGroup_Id(Long groupId);
 
     Page<SortingRule> findByGroup_IdAndInputType(Long groupId, InputType inputType, Pageable pageable);
 

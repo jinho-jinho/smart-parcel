@@ -28,6 +28,7 @@ public interface SortingGroupRepository extends JpaRepository<SortingGroup, Long
 
     // 현재 활성 그룹 조회(글로벌) 또는 관리자별 필요 시 and manager 조건 추가 버전 별도 생성 가능
     Optional<SortingGroup> findFirstByEnabledTrue();
+    Optional<SortingGroup> findFirstByManager_IdAndEnabledTrue(Long managerId);
 
     // 활성화/비활성화 (서비스에서 트랜잭션으로 "모두 false -> 지정 true")
     @Modifying
