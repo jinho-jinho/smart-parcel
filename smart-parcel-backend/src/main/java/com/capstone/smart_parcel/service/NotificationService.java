@@ -26,6 +26,7 @@ public class NotificationService {
     private final SortingContextService sortingContextService;
     private final UserNotificationRepository userNotificationRepository;
     private final UserRepository userRepository;
+    private final NotificationStreamService notificationStreamService;
 
     @Transactional
     public void notifyError(ErrorLog errorLog) {
@@ -51,6 +52,11 @@ public class NotificationService {
                         .build())
                 .toList();
         userNotificationRepository.saveAll(notifications);
+
+        notifications.forEach(notification -> {
+            Long recipientId = notification.getRecipient().getId();
+            notificationStreamService.sendNotification(recipientId, NotificationResponse.from(notification));
+        });
     }
 
     @Transactional(readOnly = true)

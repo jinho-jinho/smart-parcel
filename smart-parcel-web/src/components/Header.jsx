@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styles from "./Header.module.css";
 import NotificationBell from "./NotificationBell";
@@ -67,9 +67,6 @@ export default function Header() {
 
       <div className={styles.right}>
         <NotificationBell />
-        <span aria-label="wave" role="img">
-          👋
-        </span>
         <a href="/logout" onClick={onLogout} className={styles.btn}>
           로그아웃
         </a>

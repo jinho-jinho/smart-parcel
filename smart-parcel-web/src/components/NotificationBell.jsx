@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./Header.module.css";
 import { fetchNotifications, markNotificationRead } from "../api/notifications";
+import { baseURL } from "../api/http";
+import { authStore } from "../store/auth.store";
 
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
@@ -9,6 +11,8 @@ export default function NotificationBell() {
   const [error, setError] = useState("");
   const [total, setTotal] = useState(0);
   const containerRef = useRef(null);
+  const openRef = useRef(open);
+  const token = authStore((state) => state.accessToken);
 
   useEffect(() => {
     const handler = (event) => {
@@ -20,13 +24,7 @@ export default function NotificationBell() {
     return () => document.removeEventListener("click", handler);
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
-    loadNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
@@ -38,7 +36,46 @@ export default function NotificationBell() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (!token) {
+      return undefined;
+    }
+    const encoded = encodeURIComponent(token);
+    const source = new EventSource(`${baseURL}/api/notifications/stream?token=${encoded}`);
+
+    const handleNotification = () => {
+      setTotal((prev) => prev + 1);
+      if (openRef.current) {
+        loadNotifications();
+      }
+    };
+
+    source.addEventListener("notification", handleNotification);
+    source.addEventListener("ping", () => {});
+    source.onerror = () => {
+      source.close();
+    };
+
+    return () => {
+      source.removeEventListener("notification", handleNotification);
+      source.close();
+    };
+  }, [loadNotifications, token]);
+
+  useEffect(() => {
+    if (!open) return;
+    loadNotifications();
+  }, [open, loadNotifications]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const handleToggle = () => {
     setOpen((prev) => !prev);
@@ -110,3 +147,4 @@ function formatDate(iso) {
     return iso;
   }
 }
+
