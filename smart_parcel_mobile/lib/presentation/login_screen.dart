@@ -52,11 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // print(jsonEncode(me));
 
       if (mounted) {
-        // TODO: 로그인 후 이동 경로 지정
-        // Navigator.of(context).pushReplacementNamed('/dashboard');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인 성공')),
-        );
+        Navigator.of(context).pushReplacementNamed('/groups');
       }
     } catch (e) {
       // 서버 ApiResponse 포맷 가정

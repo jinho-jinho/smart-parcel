@@ -16,12 +16,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailCtrl = TextEditingController();
   final _pwCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
+  final _managerCtrl = TextEditingController();
   final _bizCtrl = TextEditingController(); // 필요 시 활성화
 
   // 상태
   bool _showPw = false;
   bool _showConfirm = false;
-  String _role = 'STAFF'; // ADMIN | STAFF
+  String _role = 'STAFF'; // MANAGER | STAFF
   String? _msg;
   bool _loading = false;
 
@@ -35,6 +36,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Timer? _timer;
 
   final _emailRe = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+  bool get _isStaff => _role == 'STAFF';
+  bool get _isManager => _role == 'MANAGER';
 
   @override
   void dispose() {
@@ -43,8 +46,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailCtrl.dispose();
     _pwCtrl.dispose();
     _confirmCtrl.dispose();
+    _managerCtrl.dispose();
     _codeCtrl.dispose();
-    // _bizCtrl.dispose();
+    _bizCtrl.dispose();
     super.dispose();
   }
 
@@ -128,13 +132,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final email = _emailCtrl.text.trim();
     final pw = _pwCtrl.text;
     final confirm = _confirmCtrl.text;
-    // final biz = _bizCtrl.text.trim();
+    final managerEmail = _managerCtrl.text.trim();
+    final biz = _bizCtrl.text.trim();
 
     if (name.isEmpty) return setState(() => _msg = '이름을 입력해주세요.');
     if (!_emailRe.hasMatch(email)) return setState(() => _msg = '올바른 이메일을 입력하세요.');
     if (!_emailVerified) return setState(() => _msg = '이메일 인증을 완료해주세요.');
     if (pw.length < 8) return setState(() => _msg = '비밀번호는 최소 8자 이상이어야 합니다.');
     if (pw != confirm) return setState(() => _msg = '비밀번호가 일치하지 않습니다.');
+    if (_isStaff) {
+      if (managerEmail.isEmpty) {
+        return setState(() => _msg = '소속 관리자 이메일을 입력해 주세요.');
+      }
+      if (!_emailRe.hasMatch(managerEmail)) {
+        return setState(() => _msg = '소속 관리자 이메일 형식을 확인해 주세요.');
+      }
+    }
 
     setState(() => _loading = true);
     try {
@@ -142,8 +155,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         email: email,
         password: pw,
         name: name,
-        bizNumber: null, // (필요시 값 전달)
-        role: _role,     // 서버가 받지 않으면 user_api의 role 전달 제거
+        bizNumber: _isManager ? biz : null,
+        role: _role,
+        managerEmail: _isStaff ? managerEmail : null,
       );
       // 성공 메시지
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,6 +193,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       borderRadius: BorderRadius.circular(radiusLg),
       borderSide: const BorderSide(color: inputBd, width: 1),
     );
+    final managerEmail = _managerCtrl.text.trim();
+    final managerValid = !_isStaff || _emailRe.hasMatch(managerEmail);
+    final passwordsMatch = _pwCtrl.text.isNotEmpty && _pwCtrl.text == _confirmCtrl.text;
+    final canSubmit =
+        !_loading && _emailVerified && _pwCtrl.text.length >= 8 && passwordsMatch && managerValid;
 
     Widget label(String t) => Text(t, style: const TextStyle(fontSize: 14, color: textColor));
 
@@ -359,6 +378,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 8),
                         TextField(
                           controller: _pwCtrl,
+                          onChanged: (_) => setState(() {}),
                           obscureText: !_showPw,
                           decoration: InputDecoration(
                             hintText: '최소 8자',
@@ -393,6 +413,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 8),
                         TextField(
                           controller: _confirmCtrl,
+                          onChanged: (_) => setState(() {}),
                           obscureText: !_showConfirm,
                           decoration: InputDecoration(
                             hintText: '비밀번호 확인',
@@ -425,33 +446,67 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         // 역할 선택 (반반)
                         Row(
                           children: [
-                            Expanded(child: _RoleBtn(label: '관리자', active: _role == 'ADMIN', onTap: () => setState(() => _role = 'ADMIN'))),
+                            Expanded(child: _RoleBtn(label: '관리자', active: _role == 'MANAGER', onTap: () => setState(() => _role = 'MANAGER'))),
                             const SizedBox(width: 8),
                             Expanded(child: _RoleBtn(label: '직원', active: _role == 'STAFF', onTap: () => setState(() => _role = 'STAFF'))),
                           ],
                         ),
                         const SizedBox(height: 14),
 
-                        // (선택) 사업자번호
-                        label('사업자번호(선택)'),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _bizCtrl,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: '하이픈 없이 (예: 1234567890)',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            border: inputBorder, enabledBorder: inputBorder, focusedBorder: inputBorder,
+                        // 추가 정보 (역할별)
+                        if (_isStaff) ...[
+                          label('소속 관리자 등록'),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _managerCtrl,
+                            keyboardType: TextInputType.emailAddress,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              hintText: '관리자 이메일을 입력해 주세요',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: inputBorder,
+                              enabledBorder: inputBorder,
+                              focusedBorder: inputBorder.copyWith(
+                                borderSide: const BorderSide(color: Colors.black),
+                              ),
+                              suffixIcon: const Icon(Icons.search, color: muted),
+                            ),
                           ),
-                        ),
+                          if (managerEmail.isNotEmpty && !managerValid)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 6),
+                              child: Text(
+                                '이메일 형식을 확인해 주세요.',
+                                style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                              ),
+                            ),
+                        ] else ...[
+                          label('사업자등록번호 (선택)'),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _bizCtrl,
+                            keyboardType: TextInputType.number,
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              hintText: '숫자만 입력 (예: 1234567890)',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: inputBorder,
+                              enabledBorder: inputBorder,
+                              focusedBorder: inputBorder.copyWith(
+                                borderSide: const BorderSide(color: Colors.black),
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 14),
 
                         // 회원가입 버튼
                         SizedBox(
                           height: 44,
                           child: FilledButton(
-                            onPressed: (_loading || !_emailVerified || _pwCtrl.text.length < 8) ? null : _handleSubmit,
+                            onPressed: canSubmit ? _handleSubmit : null,
                             style: FilledButton.styleFrom(
                               backgroundColor: primary,
                               foregroundColor: primaryContr,

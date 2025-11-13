@@ -10,7 +10,11 @@ Future<Map<String, dynamic>> sendCode({
   final dio = DioClient().dio;
   final res = await dio.post(
     '/api/auth/send-code',
-    queryParameters: {'email': email, 'purpose': purpose.toUpperCase()},
+    data: {
+      'email': email,
+      'purpose': purpose.toUpperCase(),
+    },
+    options: Options(contentType: 'application/json'),
   );
   return res.data as Map<String, dynamic>; // { success, data, message }
 }
@@ -25,11 +29,12 @@ Future<Map<String, dynamic>> verifyCode({
   final dio = DioClient().dio;
   final res = await dio.post(
     '/api/auth/verify-code',
-    queryParameters: {
+    data: {
       'email': email,
       'code': code,
       'purpose': purpose.toUpperCase(),
     },
+    options: Options(contentType: 'application/json'),
   );
   return res.data as Map<String, dynamic>;
 }
@@ -43,7 +48,7 @@ Future<Map<String, dynamic>> resetPassword({
 }) async {
   final dio = DioClient().dio;
   final res = await dio.post(
-    '/user/password/reset',
+    '/api/auth/password/reset',
     data: {'email': email, 'code': code, 'newPassword': newPassword},
     options: Options(contentType: 'application/json'),
   );
