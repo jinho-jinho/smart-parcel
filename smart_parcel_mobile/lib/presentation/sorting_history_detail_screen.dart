@@ -5,6 +5,7 @@ import '../core/config/app_config.dart';
 import '../data/api/history_api.dart';
 import '../data/dto/sorting_history_dto.dart';
 import 'widgets/app_shell.dart';
+import 'widgets/secure_network_image.dart';
 
 class SortingHistoryDetailScreen extends StatefulWidget {
   const SortingHistoryDetailScreen({super.key, required this.historyId});
@@ -101,12 +102,9 @@ class _SortingHistoryDetailScreenState extends State<SortingHistoryDetailScreen>
                               clipBehavior: Clip.antiAlias,
                               child: imageUrl == null
                                   ? const Center(child: Text('{Image}'))
-                                  : Image.network(
-                                      imageUrl,
+                                  : SecureNetworkImage(
+                                      imageUrl: imageUrl,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Center(
-                                        child: Text('이미지를 불러올 수 없습니다.'),
-                                      ),
                                     ),
                             ),
                           ),

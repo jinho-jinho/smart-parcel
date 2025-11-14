@@ -74,5 +74,6 @@ Future<void> logout() async {
     await dio.post('/api/auth/logout');
   } finally {
     await TokenStorage().clear();
+    await DioClient.clearStoredCookies();
   }
 }

@@ -5,6 +5,7 @@ import '../core/config/app_config.dart';
 import '../data/api/history_api.dart';
 import '../data/dto/error_history_dto.dart';
 import 'widgets/app_shell.dart';
+import 'widgets/secure_network_image.dart';
 
 class ErrorHistoryDetailScreen extends StatefulWidget {
   const ErrorHistoryDetailScreen({super.key, required this.historyId});
@@ -55,7 +56,7 @@ class _ErrorHistoryDetailScreenState extends State<ErrorHistoryDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final detail = _detail;
-    final imageUrl = _resolveImage(detail?.images?.primary);
+    final imageUrl = _resolveErrorImage(detail?.images?.primary);
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -109,12 +110,9 @@ class _ErrorHistoryDetailScreenState extends State<ErrorHistoryDetailScreen> {
                               clipBehavior: Clip.antiAlias,
                               child: imageUrl == null
                                   ? const Center(child: Text('{Image}'))
-                                  : Image.network(
-                                      imageUrl,
+                                  : SecureNetworkImage(
+                                      imageUrl: imageUrl,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Center(
-                                        child: Text('이미지를 불러올 수 없습니다.'),
-                                      ),
                                     ),
                             ),
                           ),
@@ -127,7 +125,7 @@ class _ErrorHistoryDetailScreenState extends State<ErrorHistoryDetailScreen> {
   }
 }
 
-String? _resolveImage(String? url) {
+String? _resolveErrorImage(String? url) {
   if (url == null || url.isEmpty) return null;
   if (url.startsWith('http')) return url;
   final base = AppConfig.baseUrl;
@@ -166,4 +164,12 @@ class _DetailRow extends StatelessWidget {
       ),
     );
   }
+}
+
+String? _resolveImage(String? url) {
+  if (url == null || url.isEmpty) return null;
+  if (url.startsWith('http')) return url;
+  final base = AppConfig.baseUrl;
+  if (url.startsWith('/')) return '$base$url';
+  return '$base/$url';
 }

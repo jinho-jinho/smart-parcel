@@ -101,6 +101,8 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
           _groups[idx] = _groups[idx].copyWith(enabled: enable);
         }
       });
+      _refreshing = true;
+      _loadGroups();
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -209,10 +211,9 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
                   ],
                 ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: _showGroupDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('분류그룹 추가'),
+        child: const Icon(Icons.add),
       ),
     );
   }

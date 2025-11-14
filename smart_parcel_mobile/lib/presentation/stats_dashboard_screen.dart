@@ -332,43 +332,54 @@ class _VerticalBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     if (data.isEmpty) return const _EmptyPlaceholder();
     final maxCount = data.map((e) => e.count).fold<int>(0, (prev, el) => el > prev ? el : prev);
+    final barWidth = 60.0;
+    final minWidth = barWidth * data.length;
     return SizedBox(
       height: 220,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: data.map((item) {
-          final percent = maxCount == 0 ? 0.0 : item.count / maxCount;
-          return Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text('${item.count}', style: const TextStyle(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 160 * percent,
-                        decoration: BoxDecoration(
-                          color: Colors.black87,
-                          borderRadius: BorderRadius.circular(10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: minWidth < MediaQuery.of(context).size.width
+              ? MediaQuery.of(context).size.width - 32
+              : minWidth,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: data.map((item) {
+              final percent = maxCount == 0 ? 0.0 : item.count / maxCount;
+              return SizedBox(
+                width: barWidth,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text('${item.count}', style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            height: 160 * percent,
+                            decoration: BoxDecoration(
+                              color: Colors.black87,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.date,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 12, color: AppColors.muted),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.date,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 12, color: AppColors.muted),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ),
     );
   }

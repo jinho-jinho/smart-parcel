@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
 
 import '../config/app_config.dart';
 import '../storage/token_storage.dart';
@@ -17,7 +18,38 @@ class DioClient {
   bool _isRefreshing = false;
   final List<Completer<void>> _refreshWaiters = [];
 
+  static CookieJar? _cookieJar;
+  static Future<void>? _initFuture;
   static DioClient? _instance;
+
+  static Future<void> ensureInitialized() {
+    _initFuture ??= _prepareCookieJar();
+    return _initFuture!;
+  }
+
+  static Future<void> _prepareCookieJar() async {
+    if (kIsWeb) {
+      _cookieJar = CookieJar();
+      return;
+    }
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final cookieDir = Directory('${dir.path}/cookies');
+      if (!await cookieDir.exists()) {
+        await cookieDir.create(recursive: true);
+      }
+      _cookieJar = PersistCookieJar(storage: FileStorage(cookieDir.path));
+    } catch (_) {
+      _cookieJar = CookieJar();
+    }
+  }
+
+  static Future<void> clearStoredCookies() async {
+    try {
+      await _cookieJar?.deleteAll();
+    } catch (_) {}
+  }
+
   factory DioClient() {
     if (_instance != null) return _instance!;
     final dio = Dio(BaseOptions(
@@ -29,8 +61,10 @@ class DioClient {
     ));
 
     // 모바일/데스크톱에서 RT 쿠키 자동 전송
+    final jar = _cookieJar ?? CookieJar();
+    _cookieJar = jar;
     try {
-      dio.interceptors.add(CookieManager(CookieJar()));
+      dio.interceptors.add(CookieManager(jar));
     } catch (_) {}
 
     // (선택) 요청/응답 로그
@@ -86,7 +120,7 @@ class DioClient {
     }
     _isRefreshing = true;
     try {
-      final res = await _dio.post('/user/token/refresh');
+      final res = await _dio.post('/api/auth/token/refresh');
       final data = res.data as Map;
       final newAt = (data['data'] as Map?)?['accessToken'] as String?;
       if (newAt == null) {

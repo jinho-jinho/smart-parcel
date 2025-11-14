@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/storage/auth_preference_storage.dart';
 import '../../data/api/user_api.dart' as user_api;
 
 class SmartParcelAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -135,6 +136,7 @@ class AppMenuDrawer extends StatelessWidget {
               onTap: () async {
                 Navigator.pop(context);
                 await user_api.logout();
+                await AuthPreferenceStorage().setAutoLoginEnabled(false);
                 if (context.mounted) {
                   Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
                 }

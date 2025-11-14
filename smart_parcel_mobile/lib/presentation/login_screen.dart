@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import './core/colors.dart'; 
+import '../core/storage/auth_preference_storage.dart';
+import '../core/storage/token_storage.dart';
 import '../data/api/user_api.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,6 +23,15 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _msg; // 상단 에러/안내
 
   final _emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+  final _authPrefs = AuthPreferenceStorage();
+  bool _autoLoginEnabled = false;
+  bool _autoLoginInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreAutoLoginPreference();
+  }
 
   @override
   void dispose() {
@@ -47,6 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
     try {
       final res = await login(email: email, password: pw); // /user/login
+      await _authPrefs.saveEmail(email);
+      await _authPrefs.setAutoLoginEnabled(_autoLoginEnabled);
       // 선택: /user/me 호출
       // final me = await fetchMe();
       // print(jsonEncode(me));
@@ -65,6 +78,56 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _restoreAutoLoginPreference() async {
+    final savedEmail = await _authPrefs.getSavedEmail();
+    final enabled = await _authPrefs.isAutoLoginEnabled();
+    if (!mounted) return;
+    setState(() {
+      _autoLoginEnabled = enabled;
+      if (savedEmail != null) {
+        _emailCtrl.text = savedEmail;
+      }
+    });
+    if (enabled) {
+      await _attemptAutoLogin();
+    }
+  }
+
+  Future<void> _attemptAutoLogin() async {
+    final token = await TokenStorage().getAccessToken();
+    if (token == null || token.isEmpty || !mounted) return;
+    setState(() {
+      _loading = true;
+      _autoLoginInProgress = true;
+      _msg = null;
+    });
+    try {
+      await refreshToken();
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/groups');
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _msg = '자동 로그인에 실패했습니다. 다시 로그인해 주세요.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _autoLoginInProgress = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleAutoLogin(bool? value) async {
+    final enabled = value ?? false;
+    setState(() => _autoLoginEnabled = enabled);
+    await _authPrefs.setAutoLoginEnabled(enabled);
   }
 
   @override
@@ -163,6 +226,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: 12),
                         ],
 
+                        if (_autoLoginInProgress) ...[
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              '자동 로그인 중입니다...',
+                              style: TextStyle(fontSize: 13, color: muted),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
                         // 이메일
                         const Text('이메일',
                             style: TextStyle(fontSize: 14, color: textColor)),
@@ -235,6 +309,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 14),
+
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _autoLoginEnabled,
+                              onChanged: _loading
+                                  ? null
+                                  : (value) {
+                                      _toggleAutoLogin(value);
+                                    },
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              '자동 로그인',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF2C2C2C),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
 
                         // 로그인 버튼
                         SizedBox(
