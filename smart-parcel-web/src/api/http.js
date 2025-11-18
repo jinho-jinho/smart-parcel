@@ -1,7 +1,7 @@
 import axios from "axios";
 import { authStore } from "../store/auth.store";
 
-export const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+export const baseURL = import.meta.env.VITE_API_BASE_URL || "https://smartparcel-api.azurewebsites.net";
 
 const http = axios.create({
   baseURL,

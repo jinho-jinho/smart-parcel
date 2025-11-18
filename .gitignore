@@ -10,6 +10,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Java / Kotlin compiled classes
+**/*.class
+
 # OS
 .DS_Store
 

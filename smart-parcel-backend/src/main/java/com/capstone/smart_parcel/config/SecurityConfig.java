@@ -38,7 +38,8 @@ public class SecurityConfig {
         CorsConfiguration frontCfg = new CorsConfiguration();
         frontCfg.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://smartparcel-web.azurewebsites.net"
         ));
         frontCfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         frontCfg.setAllowedHeaders(List.of("*"));
