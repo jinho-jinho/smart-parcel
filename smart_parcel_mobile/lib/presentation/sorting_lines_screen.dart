@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 import './core/colors.dart';
+import '../core/session/session_manager.dart';
 import '../data/api/chute_api.dart';
 import '../data/dto/chute_dto.dart';
+import 'widgets/read_only_banner.dart';
 
 class SortingLinesScreen extends StatefulWidget {
-  const SortingLinesScreen({super.key, this.groupId});
-
-  final int? groupId;
+  const SortingLinesScreen({super.key});
 
   @override
   State<SortingLinesScreen> createState() => _SortingLinesScreenState();
@@ -17,11 +17,22 @@ class _SortingLinesScreenState extends State<SortingLinesScreen> {
   final List<ChuteDto> _chutes = [];
   bool _loading = true;
   String? _error;
+  bool? _isManager;
+
+  bool get _canManage => _isManager == true;
 
   @override
   void initState() {
     super.initState();
+    _resolvePermissions();
     _load();
+  }
+
+  void _resolvePermissions() {
+    SessionManager.instance.isManager().then((value) {
+      if (!mounted) return;
+      setState(() => _isManager = value);
+    });
   }
 
   Future<void> _load() async {
@@ -30,7 +41,7 @@ class _SortingLinesScreenState extends State<SortingLinesScreen> {
       _error = null;
     });
     try {
-      final page = await fetchChutes(groupId: widget.groupId, size: 100);
+      final page = await fetchChutes(size: 100);
       setState(() {
         _chutes
           ..clear()
@@ -44,6 +55,7 @@ class _SortingLinesScreenState extends State<SortingLinesScreen> {
   }
 
   Future<void> _showChuteDialog({ChuteDto? chute}) async {
+    if (!_canManage) return;
     final nameCtrl = TextEditingController(text: chute?.name ?? '');
     final angleCtrl = TextEditingController(
       text: chute != null ? chute.servoDeg.toString() : '',
@@ -96,6 +108,7 @@ class _SortingLinesScreenState extends State<SortingLinesScreen> {
   }
 
   Future<void> _deleteChute(ChuteDto chute) async {
+    if (!_canManage) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -130,59 +143,72 @@ class _SortingLinesScreenState extends State<SortingLinesScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!, style: const TextStyle(color: Colors.redAccent)))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: _chutes.length,
-                  itemBuilder: (context, index) {
-                    final chute = _chutes[index];
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE6E6E6)),
+              : Column(
+                  children: [
+                    if (_isManager == false)
+                      const ReadOnlyBanner(
+                        message: '직원 계정은 분류 라인을 조회만 할 수 있습니다.',
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(20),
+                        itemCount: _chutes.length,
+                        itemBuilder: (context, index) {
+                          final chute = _chutes[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFFE6E6E6)),
+                            ),
+                            child: Row(
                               children: [
-                                Text(chute.name,
-                                    style: const TextStyle(
-                                        fontSize: 16, fontWeight: FontWeight.w700)),
-                                const SizedBox(height: 4),
-                                Text('각도: ${chute.servoDeg}°',
-                                    style: const TextStyle(color: AppColors.muted)),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(chute.name,
+                                          style: const TextStyle(
+                                              fontSize: 16, fontWeight: FontWeight.w700)),
+                                      const SizedBox(height: 4),
+                                      Text('각도: ${chute.servoDeg}°',
+                                          style: const TextStyle(color: AppColors.muted)),
+                                    ],
+                                  ),
+                                ),
+                                if (_canManage)
+                                  PopupMenuButton<String>(
+                                    onSelected: (value) {
+                                      if (value == 'edit') {
+                                        _showChuteDialog(chute: chute);
+                                      } else if (value == 'delete') {
+                                        _deleteChute(chute);
+                                      }
+                                    },
+                                    itemBuilder: (context) => const [
+                                      PopupMenuItem(value: 'edit', child: Text('수정')),
+                                      PopupMenuItem(
+                                        value: 'delete',
+                                        child: Text('삭제', style: TextStyle(color: Colors.redAccent)),
+                                      ),
+                                    ],
+                                  ),
                               ],
                             ),
-                          ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _showChuteDialog(chute: chute);
-                              } else if (value == 'delete') {
-                                _deleteChute(chute);
-                              }
-                            },
-                            itemBuilder: (context) => const [
-                              PopupMenuItem(value: 'edit', child: Text('수정')),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('삭제', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                            ],
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showChuteDialog,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _canManage
+          ? FloatingActionButton(
+              onPressed: _showChuteDialog,
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

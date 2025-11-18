@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import './core/colors.dart';
+import '../core/session/session_manager.dart';
 import '../data/api/sorting_groups_api.dart';
 import '../data/dto/sorting_group_dto.dart';
 import 'sorting_rules_screen.dart';
 import 'widgets/app_shell.dart';
+import 'widgets/read_only_banner.dart';
 
 class SortingGroupsScreen extends StatefulWidget {
   const SortingGroupsScreen({super.key});
@@ -18,11 +20,22 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
   bool _loading = true;
   bool _refreshing = false;
   String? _error;
+  bool? _isManager;
+
+  bool get _canManage => _isManager == true;
 
   @override
   void initState() {
     super.initState();
+    _resolvePermissions();
     _loadGroups();
+  }
+
+  void _resolvePermissions() {
+    SessionManager.instance.isManager().then((value) {
+      if (!mounted) return;
+      setState(() => _isManager = value);
+    });
   }
 
   Future<void> _loadGroups() async {
@@ -48,6 +61,7 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
   }
 
   Future<void> _showGroupDialog({SortingGroupDto? group}) async {
+    if (!_canManage) return;
     final controller = TextEditingController(text: group?.name ?? '');
     final result = await showDialog<String>(
       context: context,
@@ -92,6 +106,7 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
   }
 
   Future<void> _toggleGroup(SortingGroupDto group) async {
+    if (!_canManage) return;
     final enable = !group.enabled;
     try {
       await toggleSortingGroup(group.id, enable);
@@ -111,6 +126,7 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
   }
 
   Future<void> _deleteGroup(SortingGroupDto group) async {
+    if (!_canManage) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
@@ -193,9 +209,14 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
                   children: [
                     _header(context),
                     const SizedBox(height: 16),
+                    if (_isManager == false)
+                      const ReadOnlyBanner(
+                        message: '직원 계정은 분류 그룹을 조회만 할 수 있습니다.',
+                      ),
                     ..._groups.map(
                       (group) => _GroupCard(
                         group: group,
+                        canManage: _canManage,
                         onView: () => _openRules(group),
                         onToggle: () => _toggleGroup(group),
                         onRename: () => _showGroupDialog(group: group),
@@ -211,10 +232,12 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
                   ],
                 ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showGroupDialog,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _canManage
+          ? FloatingActionButton(
+              onPressed: _showGroupDialog,
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
@@ -242,9 +265,11 @@ class _SortingGroupsScreenState extends State<SortingGroupsScreen> {
   }
 }
 
+
 class _GroupCard extends StatelessWidget {
   const _GroupCard({
     required this.group,
+    required this.canManage,
     required this.onView,
     required this.onToggle,
     required this.onRename,
@@ -252,6 +277,7 @@ class _GroupCard extends StatelessWidget {
   });
 
   final SortingGroupDto group;
+  final bool canManage;
   final VoidCallback onView;
   final VoidCallback onToggle;
   final VoidCallback onRename;
@@ -299,6 +325,8 @@ class _GroupCard extends StatelessWidget {
                 onSelected: (value) {
                   if (value == 'view') {
                     onView();
+                  } else if (!canManage) {
+                    return;
                   } else if (value == 'toggle') {
                     onToggle();
                   } else if (value == 'rename') {
@@ -307,28 +335,29 @@ class _GroupCard extends StatelessWidget {
                     onDelete();
                   }
                 },
-                itemBuilder:
-                    (context) => [
-                      const PopupMenuItem(
-                        value: 'view',
-                        child: Text('분류 기준 보기'),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'view',
+                    child: Text('분류 규칙 보기'),
+                  ),
+                  if (canManage) ...[
+                    PopupMenuItem(
+                      value: 'toggle',
+                      child: Text(group.enabled ? '비활성화' : '활성화'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'rename',
+                      child: Text('이름 수정'),
+                    ),
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Text(
+                        '삭제',
+                        style: TextStyle(color: Colors.redAccent),
                       ),
-                      PopupMenuItem(
-                        value: 'toggle',
-                        child: Text(group.enabled ? '비활성화' : '활성화'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'rename',
-                        child: Text('이름 수정'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text(
-                          '삭제',
-                          style: TextStyle(color: Colors.redAccent),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ],
               ),
             ],
           ),

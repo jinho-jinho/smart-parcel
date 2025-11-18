@@ -526,14 +526,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 8),
 
                         // 하단 링크
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
                             const Text('이미 계정이 있으신가요?', style: TextStyle(fontSize: 12, color: muted)),
-                            const SizedBox(width: 6),
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 foregroundColor: textColor,
                                 textStyle: const TextStyle(
                                   decoration: TextDecoration.underline,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import './core/colors.dart';
+import '../core/session/session_manager.dart';
 import '../core/storage/auth_preference_storage.dart';
 import '../data/api/user_api.dart' as user_api;
 import '../data/dto/user_response_dto.dart';
@@ -46,6 +47,7 @@ class _MeScreenState extends State<MeScreen> {
 
   Future<void> _logout() async {
     await user_api.logout();
+    SessionManager.instance.clear();
     await AuthPreferenceStorage().setAutoLoginEnabled(false);
     if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);

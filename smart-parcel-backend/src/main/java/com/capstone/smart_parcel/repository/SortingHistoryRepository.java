@@ -44,6 +44,7 @@ public interface SortingHistoryRepository extends JpaRepository<SortingHistory, 
     FROM SortingHistory sh
     WHERE sh.processedAt >= :start AND sh.processedAt < :end
       AND sh.manager.id = :managerId
+      AND (:groupId IS NULL OR sh.group.id = :groupId)
     GROUP BY function('date', sh.processedAt)
     ORDER BY function('date', sh.processedAt) ASC
 """)

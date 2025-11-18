@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 
 import './core/colors.dart';
+import '../core/session/session_manager.dart';
 import '../data/api/chute_api.dart';
 import '../data/api/sorting_rules_api.dart';
 import '../data/dto/chute_dto.dart';
 import '../data/dto/sorting_group_dto.dart';
 import '../data/dto/sorting_rule_dto.dart';
 import 'sorting_lines_screen.dart';
+import 'widgets/read_only_banner.dart';
 
 const _inputTypes = [
   {'label': '텍스트', 'value': 'TEXT'},
   {'label': '색상', 'value': 'COLOR'},
+];
+
+const _colorOptions = [
+  {'label': '빨강', 'value': 'RED'},
+  {'label': '노랑', 'value': 'YELLOW'},
+  {'label': '초록', 'value': 'GREEN'},
+  {'label': '파랑', 'value': 'BLUE'},
 ];
 
 class SortingRulesScreen extends StatefulWidget {
@@ -26,11 +35,22 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
   final List<SortingRuleDto> _rules = [];
   bool _loading = true;
   String? _error;
+  bool? _isManager;
+
+  bool get _canManage => _isManager == true;
 
   @override
   void initState() {
     super.initState();
+    _resolvePermissions();
     _loadRules();
+  }
+
+  void _resolvePermissions() {
+    SessionManager.instance.isManager().then((value) {
+      if (!mounted) return;
+      setState(() => _isManager = value);
+    });
   }
 
   Future<void> _loadRules() async {
@@ -53,6 +73,7 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
   }
 
   Future<void> _deleteRule(SortingRuleDto rule) async {
+    if (!_canManage) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -75,14 +96,19 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
   }
 
   Future<void> _showRuleSheet({SortingRuleDto? rule}) async {
+    if (!_canManage) return;
     final nameCtrl = TextEditingController(text: rule?.name ?? '');
     final itemCtrl = TextEditingController(text: rule?.itemName ?? '');
     final inputValueCtrl = TextEditingController(text: rule?.inputValue ?? '');
     String inputType = rule?.inputType ?? 'TEXT';
     int? selectedChuteId = rule?.chutes.isNotEmpty == true ? rule!.chutes.first.id : null;
     bool saving = false;
+    String selectedColor = _colorOptions.first['value'] as String;
+    if (rule?.inputType == 'COLOR' && rule!.inputValue.isNotEmpty) {
+      selectedColor = rule.inputValue;
+    }
 
-    final chutePage = await fetchChutes(groupId: widget.group.id, size: 100);
+    final chutePage = await fetchChutes(size: 100);
     final chuteOptions = chutePage.content;
 
     await showModalBottomSheet<void>(
@@ -147,17 +173,39 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
                                 .toList(),
                             onChanged: (value) {
                               if (value == null) return;
-                              setSheetState(() => inputType = value);
+                              setSheetState(() {
+                                inputType = value;
+                                if (value == 'COLOR' && selectedColor.isEmpty) {
+                                  selectedColor = _colorOptions.first['value'] as String;
+                                }
+                              });
                             },
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           flex: 3,
-                          child: TextField(
-                            controller: inputValueCtrl,
-                            decoration: const InputDecoration(hintText: '표식 값'),
-                          ),
+                          child: inputType == 'COLOR'
+                              ? DropdownButtonFormField<String>(
+                                  value: selectedColor,
+                                  decoration: const InputDecoration(),
+                                  items: _colorOptions
+                                      .map(
+                                        (option) => DropdownMenuItem<String>(
+                                          value: option['value'] as String,
+                                          child: Text(option['label'] as String),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value == null) return;
+                                    setSheetState(() => selectedColor = value);
+                                  },
+                                )
+                              : TextField(
+                                  controller: inputValueCtrl,
+                                  decoration: const InputDecoration(hintText: '표식 값'),
+                                ),
                         ),
                       ],
                     ),
@@ -183,7 +231,7 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => SortingLinesScreen(groupId: widget.group.id),
+                                builder: (_) => const SortingLinesScreen(),
                               ),
                             ).then((_) => _loadRules());
                           },
@@ -201,7 +249,9 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
                           : () async {
                               final ruleName = nameCtrl.text.trim();
                               final itemName = itemCtrl.text.trim();
-                              final markerValue = inputValueCtrl.text.trim();
+                              final markerValue = inputType == 'COLOR'
+                                  ? selectedColor
+                                  : inputValueCtrl.text.trim();
                               if (ruleName.isEmpty ||
                                   itemName.isEmpty ||
                                   markerValue.isEmpty) {
@@ -281,8 +331,13 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
                   children: [
                     _groupSummary(widget.group),
                     const SizedBox(height: 16),
+                    if (_isManager == false)
+                      const ReadOnlyBanner(
+                        message: '직원 계정은 분류 기준을 조회만 할 수 있습니다.',
+                      ),
                     ..._rules.map((rule) => _RuleCard(
                           rule: rule,
+                          canManage: _canManage,
                           onEdit: () => _showRuleSheet(rule: rule),
                           onDelete: () => _deleteRule(rule),
                         )),
@@ -293,11 +348,12 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
                         child: const Text('등록된 기준이 없습니다.'),
                       ),
                     const SizedBox(height: 24),
-                    OutlinedButton.icon(
-                      onPressed: _showRuleSheet,
-                      icon: const Icon(Icons.add),
-                      label: const Text('+ 기준 추가하기'),
-                    ),
+                    if (_canManage)
+                      OutlinedButton.icon(
+                        onPressed: _showRuleSheet,
+                        icon: const Icon(Icons.add),
+                        label: const Text('기준 추가하기'),
+                      ),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -346,14 +402,17 @@ class _SortingRulesScreenState extends State<SortingRulesScreen> {
   }
 }
 
+
 class _RuleCard extends StatelessWidget {
   const _RuleCard({
     required this.rule,
+    required this.canManage,
     required this.onEdit,
     required this.onDelete,
   });
 
   final SortingRuleDto rule;
+  final bool canManage;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -374,28 +433,29 @@ class _RuleCard extends StatelessWidget {
             children: [
               Text(rule.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const Spacer(),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    onEdit();
-                  } else if (value == 'delete') {
-                    onDelete();
-                  }
-                },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'edit', child: Text('수정')),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text('삭제', style: TextStyle(color: Colors.redAccent)),
-                  ),
-                ],
-              ),
+              if (canManage)
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      onEdit();
+                    } else if (value == 'delete') {
+                      onDelete();
+                    }
+                  },
+                  itemBuilder: (context) => const [
+                    PopupMenuItem(value: 'edit', child: Text('수정')),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Text('삭제', style: TextStyle(color: Colors.redAccent)),
+                    ),
+                  ],
+                ),
             ],
           ),
           const SizedBox(height: 12),
           _fieldRow('물품명', rule.itemName),
           const SizedBox(height: 8),
-          _fieldRow('분류 표식', '${rule.inputType} · ${rule.inputValue}'),
+          _fieldRow('분류 방식', '${rule.inputType} · ${rule.inputValue}'),
           const SizedBox(height: 8),
           _fieldRow(
             '서보 각도',
@@ -406,7 +466,7 @@ class _RuleCard extends StatelessWidget {
           if (rule.chutes.length > 1)
             Padding(
               padding: const EdgeInsets.only(top: 6),
-              child: Text('외 ${rule.chutes.length - 1}개 라인',
+              child: Text('추가 ${rule.chutes.length - 1}개 라인',
                   style: const TextStyle(color: AppColors.muted, fontSize: 13)),
             ),
         ],

@@ -41,11 +41,10 @@ const INPUT_TYPES = [
 ];
 
 const COLOR_OPTIONS = [
-  { value: "RED", label: "빨간색", swatch: "#ef4444" },
-  { value: "ORANGE", label: "주황색", swatch: "#f97316" },
-  { value: "YELLOW", label: "노란색", swatch: "#facc15" },
-  { value: "GREEN", label: "초록색", swatch: "#22c55e" },
-  { value: "BLUE", label: "파란색", swatch: "#3b82f6" },
+  { value: "RED", label: "빨강", swatch: "#ef4444" },
+  { value: "YELLOW", label: "노랑", swatch: "#facc15" },
+  { value: "GREEN", label: "초록", swatch: "#22c55e" },
+  { value: "BLUE", label: "파랑", swatch: "#3b82f6" },
 ];
 
 const CHUTE_PAGE_SIZE = 100;

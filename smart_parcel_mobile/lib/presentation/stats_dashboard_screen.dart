@@ -53,13 +53,28 @@ class _StatsDashboardScreenState extends State<StatsDashboardScreen> {
       _error = null;
     });
     try {
-      final from = DateTime(_fromDate.year, _fromDate.month, _fromDate.day, 0, 0, 0);
-      final to = DateTime(_toDate.year, _toDate.month, _toDate.day, 23, 59, 59);
+      final filters = _currentFilters();
       final results = await Future.wait([
-        fetchStatsByChute(from: from, to: to, groupId: _groupId),
-        fetchStatsDaily(from: from, to: to, groupId: _groupId),
-        fetchStatsByErrorCode(from: from, to: to, groupId: _groupId),
-        fetchErrorRate(from: from, to: to, groupId: _groupId),
+        fetchStatsByChute(
+          from: filters.from,
+          to: filters.to,
+          groupId: filters.groupId,
+        ),
+        fetchStatsDaily(
+          from: filters.from,
+          to: filters.to,
+          groupId: filters.groupId,
+        ),
+        fetchStatsByErrorCode(
+          from: filters.from,
+          to: filters.to,
+          groupId: filters.groupId,
+        ),
+        fetchErrorRate(
+          from: filters.from,
+          to: filters.to,
+          groupId: filters.groupId,
+        ),
       ]);
 
       setState(() {
@@ -103,6 +118,12 @@ class _StatsDashboardScreenState extends State<StatsDashboardScreen> {
   }
 
   Future<void> _onRefresh() => _loadStats();
+
+  ({DateTime from, DateTime to, int? groupId}) _currentFilters() {
+    final from = DateTime(_fromDate.year, _fromDate.month, _fromDate.day, 0, 0, 0);
+    final to = DateTime(_toDate.year, _toDate.month, _toDate.day, 23, 59, 59);
+    return (from: from, to: to, groupId: _groupId);
+  }
 
   @override
   Widget build(BuildContext context) {

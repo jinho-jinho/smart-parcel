@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/config/app_config.dart';
+import '../../core/session/session_manager.dart';
 import '../../core/storage/auth_preference_storage.dart';
 import '../../data/api/user_api.dart' as user_api;
 
@@ -63,11 +64,30 @@ class SmartParcelAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class AppMenuDrawer extends StatelessWidget {
+class AppMenuDrawer extends StatefulWidget {
   const AppMenuDrawer({super.key});
 
   @override
+  State<AppMenuDrawer> createState() => _AppMenuDrawerState();
+}
+
+class _AppMenuDrawerState extends State<AppMenuDrawer> {
+  bool? _isManager;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final result = await SessionManager.instance.isManager();
+    if (!mounted) return;
+    setState(() => _isManager = result);
+  }
+  @override
   Widget build(BuildContext context) {
+    final canManageStaff = _isManager == true;
     return Drawer(
       child: SafeArea(
         child: ListView(
@@ -119,11 +139,12 @@ class AppMenuDrawer extends StatelessWidget {
               label: '알림 센터',
               onTap: () => _navigate(context, '/notifications'),
             ),
-            _NavTile(
-              icon: Icons.badge_outlined,
-              label: '직원 관리',
-              onTap: () => _navigate(context, '/staff'),
-            ),
+            if (canManageStaff)
+              _NavTile(
+                icon: Icons.badge_outlined,
+                label: '직원 관리',
+                onTap: () => _navigate(context, '/staff'),
+              ),
             _NavTile(
               icon: Icons.person_outline,
               label: '내 정보',
@@ -136,6 +157,7 @@ class AppMenuDrawer extends StatelessWidget {
               onTap: () async {
                 Navigator.pop(context);
                 await user_api.logout();
+                SessionManager.instance.clear();
                 await AuthPreferenceStorage().setAutoLoginEnabled(false);
                 if (context.mounted) {
                   Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);

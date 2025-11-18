@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import './core/colors.dart'; 
+import '../core/session/session_manager.dart';
 import '../core/storage/auth_preference_storage.dart';
 import '../core/storage/token_storage.dart';
 import '../data/api/user_api.dart';
@@ -57,9 +58,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _loading = true);
     try {
-      final res = await login(email: email, password: pw); // /user/login
+      await login(email: email, password: pw); // /user/login
       await _authPrefs.saveEmail(email);
       await _authPrefs.setAutoLoginEnabled(_autoLoginEnabled);
+      await SessionManager.instance.ensureUserLoaded(force: true);
       // 선택: /user/me 호출
       // final me = await fetchMe();
       // print(jsonEncode(me));
@@ -105,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       await refreshToken();
+      await SessionManager.instance.ensureUserLoaded(force: true);
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/groups');
       }

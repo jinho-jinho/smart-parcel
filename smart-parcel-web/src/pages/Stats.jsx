@@ -349,7 +349,7 @@ function normalizeParams(query) {
     params.to = new Date(`${query.to}T23:59:59`).toISOString();
   }
   if (query.groupId) {
-    params.groupId = query.groupId;
+    params.groupId = Number(query.groupId);
   }
   return params;
 }
