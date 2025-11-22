@@ -39,7 +39,7 @@ public class SecurityConfig {
         frontCfg.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "https://smartparcel-web.azurewebsites.net"
+                "https://thankful-bay-05e84e200.3.azurestaticapps.net"
         ));
         frontCfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         frontCfg.setAllowedHeaders(List.of("*"));

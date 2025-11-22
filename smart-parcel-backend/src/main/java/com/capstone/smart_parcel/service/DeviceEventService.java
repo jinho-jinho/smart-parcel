@@ -86,7 +86,7 @@ public class DeviceEventService {
         SortingHistory history = SortingHistory.builder()
                 .imageUrl(storedPath)
                 .processedAt(request.processedAt() != null ? request.processedAt() : OffsetDateTime.now())
-                .sortingGroupNameSnapshot(resolveItemName(rule, group))
+                .sortingGroupNameSnapshot(rule.getItemName())
                 .chuteNameSnapshot(chute.getChuteName())
                 .manager(manager)
                 .group(group)
@@ -139,7 +139,7 @@ public class DeviceEventService {
                 .errorCode(request.errorCode().trim())
                 .occurredAt(request.occurredAt() != null ? request.occurredAt() : OffsetDateTime.now())
                 .imageUrl(storedPath)
-                .sortingGroupNameSnapshot(group != null ? group.getGroupName() : null)
+                .sortingGroupNameSnapshot(rule != null ? rule.getItemName() : (group != null ? group.getGroupName() : null))
                 .chuteNameSnapshot(chute != null ? chute.getChuteName() : null)
                 .manager(manager)
                 .group(group)
@@ -160,11 +160,4 @@ public class DeviceEventService {
         return user;
     }
 
-    private String resolveItemName(SortingRule rule, SortingGroup group) {
-        String itemName = rule.getItemName();
-        if (itemName != null && !itemName.isBlank()) {
-            return itemName;
-        }
-        return group.getGroupName();
-    }
 }
