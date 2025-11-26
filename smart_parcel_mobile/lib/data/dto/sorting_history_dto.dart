@@ -1,5 +1,11 @@
 import 'image_resource_bundle.dart';
 
+DateTime? _parseDateTime(String? raw) {
+  if (raw == null) return null;
+  final parsed = DateTime.tryParse(raw);
+  return parsed?.toLocal();
+}
+
 class SortingHistorySummaryDto {
   final int id;
   final String itemName;
@@ -18,7 +24,7 @@ class SortingHistorySummaryDto {
       id: (json['id'] as num).toInt(),
       itemName: (json['itemName'] as String?) ?? '-',
       lineName: (json['lineName'] as String?) ?? '-',
-      processedAt: json['processedAt'] != null ? DateTime.tryParse(json['processedAt']) : null,
+      processedAt: _parseDateTime(json['processedAt'] as String?),
     );
   }
 }
@@ -43,7 +49,7 @@ class SortingHistoryDetailDto {
       id: (json['id'] as num).toInt(),
       itemName: (json['itemName'] as String?) ?? '-',
       lineName: (json['lineName'] as String?) ?? '-',
-      processedAt: json['processedAt'] != null ? DateTime.tryParse(json['processedAt']) : null,
+      processedAt: _parseDateTime(json['processedAt'] as String?),
       images: json['images'] != null
           ? ImageResourceBundleDto.fromJson(json['images'] as Map<String, dynamic>)
           : null,

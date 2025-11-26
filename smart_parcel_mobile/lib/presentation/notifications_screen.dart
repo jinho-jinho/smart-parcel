@@ -178,7 +178,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                       ),
                                       TextButton(
                                         onPressed: () => _markAsRead(item),
-                                        child: const Text('읽음 처리'),
+                                        child: const Text('읽음'),
                                       )
                                     ],
                                   ),

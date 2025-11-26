@@ -49,9 +49,9 @@ CREATE TABLE sorting_groups (
                                     FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE RESTRICT
 );
 
-CREATE UNIQUE INDEX ux_only_one_enabled_group
-    ON sorting_groups ((enabled))
-  WHERE enabled = TRUE;
+CREATE UNIQUE INDEX ux_manager_only_one_enabled_group
+    ON sorting_groups (manager_id)
+    WHERE enabled = TRUE;
 
 CREATE INDEX idx_groups_manager_id ON sorting_groups(manager_id);
 
@@ -184,34 +184,3 @@ CREATE TABLE email_verifications (
 
 -- 스프링 @Index(name="idx_email_purpose", columnList="email, purpose")
 CREATE INDEX idx_email_purpose ON email_verifications(email, purpose);
-
--- =========================================================
--- 11) 스냅샷 자동 채움 트리거 (servo_deg_snapshot 없이)
--- =========================================================
-CREATE OR REPLACE FUNCTION fill_snapshots() RETURNS trigger AS $$
-BEGIN
-  IF NEW.group_id IS NOT NULL THEN
-SELECT g.group_name
-INTO NEW.sorting_group_name_snapshot
-FROM sorting_groups g
-WHERE g.id = NEW.group_id;
-END IF;
-
-  IF NEW.chute_id IS NOT NULL THEN
-SELECT c.chute_name
-INTO NEW.chute_name_snapshot
-FROM chutes c
-WHERE c.id = NEW.chute_id;
-END IF;
-
-RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_history_snap
-    BEFORE INSERT ON sorting_history
-    FOR EACH ROW EXECUTE FUNCTION fill_snapshots();
-
-CREATE TRIGGER trg_error_snap
-    BEFORE INSERT ON error_logs
-    FOR EACH ROW EXECUTE FUNCTION fill_snapshots();

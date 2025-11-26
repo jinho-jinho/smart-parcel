@@ -1,4 +1,3 @@
-// com/capstone/smart_parcel/domain/Chute.java
 package com.capstone.smart_parcel.domain;
 
 import jakarta.persistence.*;

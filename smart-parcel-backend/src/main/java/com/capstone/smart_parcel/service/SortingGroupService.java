@@ -92,7 +92,7 @@ public class SortingGroupService {
         SortingGroup group = sortingGroupRepository.findByIdAndManager_Id(groupId, ctx.manager().getId())
                 .orElseThrow(() -> new NoSuchElementException("분류 그룹을 찾을 수 없습니다."));
 
-        sortingGroupRepository.disableAll();
+        sortingGroupRepository.disableAllByManager(ctx.manager().getId());
         sortingGroupRepository.enable(groupId);
         group.setEnabled(true);
         group.setUpdatedAt(OffsetDateTime.now());

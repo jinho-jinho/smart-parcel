@@ -32,8 +32,8 @@ public interface SortingGroupRepository extends JpaRepository<SortingGroup, Long
 
     // 활성화/비활성화 (서비스에서 트랜잭션으로 "모두 false -> 지정 true")
     @Modifying
-    @Query("UPDATE SortingGroup g SET g.enabled = FALSE")
-    int disableAll();
+    @Query("UPDATE SortingGroup g SET g.enabled = FALSE WHERE g.manager.id = :managerId")
+    int disableAllByManager(@Param("managerId") Long managerId);
 
     @Modifying
     @Query("UPDATE SortingGroup g SET g.enabled = TRUE WHERE g.id = :groupId")
