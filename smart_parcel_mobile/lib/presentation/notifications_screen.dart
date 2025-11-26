@@ -43,8 +43,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
 
     try {
-      final page =
-          await fetchNotifications(page: _nextPage, size: _pageSize, unreadOnly: true);
+      final page = await fetchNotifications(
+        page: _nextPage,
+        size: _pageSize,
+        unreadOnly: true,
+      );
       setState(() {
         if (reset) {
           _items
@@ -73,8 +76,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       await markNotificationRead(notification.id);
       setState(() => _items.removeWhere((n) => n.id == notification.id));
     } catch (_) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('읽음 처리에 실패했습니다.')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('읽음 처리에 실패했습니다.')));
     }
   }
 
@@ -116,87 +120,97 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () => _load(reset: true),
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _error != null
+              child:
+                  _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _error != null
                       ? ListView(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Text(
+                              _error!,
+                              style: const TextStyle(color: Colors.redAccent),
                             ),
-                          ],
-                        )
+                          ),
+                        ],
+                      )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: (_items.isEmpty ? 1 : _items.length + 1),
-                          itemBuilder: (context, index) {
-                            if (_items.isEmpty) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 80),
-                                child: Center(child: Text('읽지 않은 알림이 없습니다.')),
-                              );
-                            }
-                            if (index == _items.length) {
-                              if (!_hasMore) return const SizedBox(height: 80);
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Center(
-                                  child: _loadingMore
-                                      ? const CircularProgressIndicator()
-                                      : OutlinedButton(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: (_items.isEmpty ? 1 : _items.length + 1),
+                        itemBuilder: (context, index) {
+                          if (_items.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 80),
+                              child: Center(child: Text('읽지 않은 알림이 없습니다.')),
+                            );
+                          }
+                          if (index == _items.length) {
+                            if (!_hasMore) return const SizedBox(height: 80);
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child:
+                                    _loadingMore
+                                        ? const CircularProgressIndicator()
+                                        : OutlinedButton(
                                           onPressed: _load,
                                           child: const Text('더 불러오기'),
                                         ),
-                                ),
-                              );
-                            }
-                            final item = _items[index];
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF4F4),
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: Colors.redAccent,
-                                  width: 1.2,
-                                ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
+                            );
+                          }
+                          final item = _items[index];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF4F4),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: Colors.redAccent,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
                                         '[에러코드: ${item.errorCode ?? '-'}]',
                                         style: const TextStyle(
                                           color: Colors.redAccent,
                                           fontWeight: FontWeight.w700,
                                         ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      TextButton(
-                                        onPressed: () => _markAsRead(item),
-                                        child: const Text('읽음'),
-                                      )
-                                    ],
+                                    ),
+                                    TextButton(
+                                      onPressed: () => _markAsRead(item),
+                                      child: const Text('읽음 처리'),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _buildMessage(item),
+                                  style: const TextStyle(height: 1.3),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _format(item.createdAt ?? item.occurredAt),
+                                  style: const TextStyle(
+                                    color: AppColors.muted,
+                                    fontSize: 12,
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    _buildMessage(item),
-                                    style: const TextStyle(height: 1.3),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _format(item.createdAt ?? item.occurredAt),
-                                    style: const TextStyle(color: AppColors.muted, fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
             ),
           ),
         ],

@@ -1,5 +1,11 @@
 import 'image_resource_bundle.dart';
 
+DateTime? _parseDateTime(String? raw) {
+  if (raw == null) return null;
+  final parsed = DateTime.tryParse(raw);
+  return parsed?.toLocal();
+}
+
 class ErrorHistorySummaryDto {
   final int id;
   final String itemName;
@@ -21,7 +27,7 @@ class ErrorHistorySummaryDto {
       itemName: (json['itemName'] as String?) ?? '-',
       lineName: (json['lineName'] as String?) ?? '-',
       errorCode: (json['errorCode'] as String?) ?? '-',
-      occurredAt: json['occurredAt'] != null ? DateTime.tryParse(json['occurredAt']) : null,
+      occurredAt: _parseDateTime(json['occurredAt'] as String?),
     );
   }
 }
@@ -49,7 +55,7 @@ class ErrorHistoryDetailDto {
       itemName: (json['itemName'] as String?) ?? '-',
       lineName: (json['lineName'] as String?) ?? '-',
       errorCode: (json['errorCode'] as String?) ?? '-',
-      occurredAt: json['occurredAt'] != null ? DateTime.tryParse(json['occurredAt']) : null,
+      occurredAt: _parseDateTime(json['occurredAt'] as String?),
       images: json['images'] != null
           ? ImageResourceBundleDto.fromJson(json['images'] as Map<String, dynamic>)
           : null,
