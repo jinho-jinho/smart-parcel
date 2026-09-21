@@ -1,25 +1,25 @@
 # 팀 프로젝트 기준선
 
-이 문서는 캡스톤 팀 프로젝트의 마지막 상태와 이후 박진호 개인 고도화 작업의 경계를 고정한다. 기준 태그 이후의 커밋만 개인 고도화 범위로 설명한다.
+이 문서는 캡스톤 팀 프로젝트의 마지막 상태와 이후 박진호 개인 고도화 작업의 경계를 고정한다. 통합 기준 태그 이후의 커밋만 개인 고도화 범위로 설명한다.
 
 ## Git 기준점
 
-| 저장소 | 당시 브랜치 | 기준 커밋 | 기준 태그 | 개인 고도화 브랜치 |
-| --- | --- | --- | --- | --- |
-| `smart-parcel` | `main` | `0645cf5ac6a7990001179cdac6b5cbb66d65c3a6` | `baseline/team-project-final` | `portfolio/backend-modernization` |
-| `smart-sort-ai` | `skdud` | `7846bca7f1e947a56794e98b0364cc969ade60a2` | `baseline/team-project-final` | `portfolio/backend-modernization` |
+| 구성 요소 | 원본 브랜치 | 원본 기준 커밋 | 통합 후 경계 |
+| --- | --- | --- | --- |
+| `smart-parcel` | `main` | `0645cf5ac6a7990001179cdac6b5cbb66d65c3a6` | `baseline/team-project-final` |
+| `smart-sort-ai` | `skdud` | `7846bca7f1e947a56794e98b0364cc969ade60a2` | `baseline/team-project-integrated` |
 
-기준 태그는 기존 팀 프로젝트의 마지막 커밋을 가리킨다. 고도화 작업은 두 저장소의 `portfolio/backend-modernization` 브랜치에서만 진행한다.
+`baseline/team-project-final`은 원래 `smart-parcel` 팀 프로젝트의 마지막 커밋을 가리킨다. `baseline/team-project-integrated`는 AI 저장소의 기준 스냅샷까지 상위 저장소에 포함한 통합 기준점을 가리킨다. 개인 고도화는 통합 기준점 이후 `portfolio/backend-modernization` 브랜치에서 진행한다.
 
-현재 로컬 구조에서 `smart-sort-ai`는 `smart-parcel` 폴더 안에 있지만 별도 `.git`을 가진 독립 저장소다. `smart-sort-arduino`도 별도 저장소이며 이번 백엔드 고도화 기준선의 변경 대상에서는 제외한다. 상위 저장소에서 두 중첩 저장소를 통째로 `git add`하지 않는다.
+2026-09-21에 `smart-sort-ai/.git`을 제거하고, 원본 AI 커밋이 추적하던 3,905개 파일을 `smart-parcel` 저장소에 기준 스냅샷으로 편입했다. AI의 원본 커밋 해시는 위 표에 보존한다. `smart-sort-arduino`는 별도 저장소로 유지하며 이번 백엔드 고도화 범위에서 제외한다.
 
 ### 원격 저장소 기록
 
-- `smart-parcel`: `https://github.com/jinho-jinho/smart-parcel.git`
-- 로컬 `smart-sort-ai`의 현재 `origin`: `https://github.com/yoniyon03/smart-sort-ai.git`
-- 포트폴리오에서 제시한 AI 저장소: `https://github.com/jinho-jinho/smart-sort-ai`
+- 통합 저장소 `origin`: `https://github.com/jinho-jinho/smart-parcel.git`
+- AI 스냅샷을 가져온 원본 저장소의 당시 `origin`: `https://github.com/yoniyon03/smart-sort-ai.git`
+- 포트폴리오에서 제시했던 AI 저장소: `https://github.com/jinho-jinho/smart-sort-ai`
 
-AI 저장소의 로컬 `origin`과 포트폴리오에서 제시한 URL이 다르다. 기준선 보존 단계에서는 원격 주소를 임의로 변경하지 않는다. 이후 푸시 전에 개인 저장소를 `origin` 또는 별도 remote로 사용할지 결정한다.
+통합 이후 AI 변경사항도 `smart-parcel` 저장소의 `smart-sort-ai/` 경로에서 함께 추적한다. 별도 AI 원격 저장소에는 이후 변경사항을 푸시하지 않는다.
 
 ## 당시 구현 실행 방법
 
@@ -115,3 +115,17 @@ python .\main\total_run_project.py
 - 같은 데이터 건수와 분포
 - 같은 동시 사용자 수 또는 요청 도착률
 - 같은 시험 시간과 워밍업 방식
+- 같은 실행 환경과 DB 자원
+- 같은 캐시 상태
+- 같은 측정 도구와 임계값 정의
+
+따라서 당시 혼합 요청 p95 `3.87초`와 이후 이력 조회 API 하나의 p95를 직접 비교해 개선율을 계산하지 않는다. 새 기준선 측정과 최적화 후 측정을 같은 조건으로 다시 수행해 개선율을 산출한다.
+
+## 이력 구분 원칙
+
+- `baseline/team-project-final`: 원래 `smart-parcel` 팀 프로젝트 당시 상태
+- AI 원본 커밋 `7846bca7f1e947a56794e98b0364cc969ade60a2`: 통합한 AI 팀 프로젝트 스냅샷의 출처
+- `baseline/team-project-integrated`: 두 코드베이스를 합친 팀 프로젝트 기준 상태
+- `portfolio/backend-modernization`: 박진호 개인 고도화 작업 브랜치
+- 통합 기준 태그 이후 커밋: 요구사항, 부하 가정, DB 확장, 쿼리 최적화, 전달 신뢰성, 장애 실험을 각각 작은 단위로 기록
+- 포트폴리오 성과 수치: 재현 명령, 원본 결과 파일, 커밋 해시를 함께 보관
