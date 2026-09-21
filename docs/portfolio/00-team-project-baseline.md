@@ -10,7 +10,7 @@
 | `smart-sort-ai` | `skdud` | `7846bca7f1e947a56794e98b0364cc969ade60a2` | `baseline/team-project-integrated` |
 | `smart-sort-arduino` | `main` | `eb52313bbe26838b828110e266a0d341391b8cc3` | `baseline/team-project-full` |
 
-`baseline/team-project-final`은 원래 `smart-parcel` 팀 프로젝트의 마지막 커밋을 가리킨다. `baseline/team-project-integrated`는 AI 저장소까지 포함한 기준점이며, `baseline/team-project-full`은 Arduino 저장소까지 모두 포함한 최종 팀 프로젝트 기준점이다. 개인 고도화는 전체 통합 기준점 이후 `portfolio/backend-modernization` 브랜치에서 진행한다.
+`baseline/team-project-final`은 원래 `smart-parcel` 팀 프로젝트의 마지막 커밋을 가리킨다. `baseline/team-project-integrated`는 AI 저장소까지 포함한 기준점이며, `baseline/team-project-full`은 Arduino 저장소까지 모두 포함한 최종 팀 프로젝트 기준점이다. 개인 고도화는 전체 통합 기준점 이후 `portfolio/backend-scalability` 브랜치에서 진행한다.
 
 2026-09-21에 `smart-sort-ai/.git`과 `smart-sort-arduino/.git`을 제거했다. 원본 AI 커밋이 추적하던 3,905개 파일과 Arduino 커밋이 추적하던 2개 파일을 `smart-parcel` 저장소에 기준 스냅샷으로 편입했다. 각 원본 커밋 해시는 위 표에 보존한다.
 
@@ -130,6 +130,6 @@ python .\main\total_run_project.py
 - `baseline/team-project-integrated`: 두 코드베이스를 합친 팀 프로젝트 기준 상태
 - Arduino 원본 커밋 `eb52313bbe26838b828110e266a0d341391b8cc3`: 통합한 펌웨어 팀 프로젝트 스냅샷의 출처
 - `baseline/team-project-full`: 웹, 백엔드, 모바일, AI, Arduino를 모두 합친 팀 프로젝트 기준 상태
-- `portfolio/backend-modernization`: 박진호 개인 고도화 작업 브랜치
+- `portfolio/backend-scalability`: 박진호 개인 고도화 작업 브랜치
 - 전체 통합 기준 태그 이후 커밋: 요구사항, 부하 가정, DB 확장, 쿼리 최적화, 전달 신뢰성, 장애 실험을 각각 작은 단위로 기록
 - 포트폴리오 성과 수치: 재현 명령, 원본 결과 파일, 커밋 해시를 함께 보관
