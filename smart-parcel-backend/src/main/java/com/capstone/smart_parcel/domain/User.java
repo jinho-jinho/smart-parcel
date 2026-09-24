@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
+    @Column(name = "organization_id", nullable = false)
+    private Long organizationId;
+
     // self reference (optional)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id",

@@ -26,6 +26,9 @@ public class RedisConfig {
     @Value("${spring.data.redis.username}")
     private String username;
 
+    @Value("${spring.data.redis.ssl.enabled:true}")
+    private boolean ssl;
+
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration serverConfig = new RedisStandaloneConfiguration();
@@ -34,13 +37,13 @@ public class RedisConfig {
         serverConfig.setPassword(password);
         serverConfig.setUsername(username);
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+        var clientBuilder = LettuceClientConfiguration.builder()
                 .commandTimeout(Duration.ofMillis(60000)) // 60초 타임아웃
                 .clientOptions(ClientOptions.builder()
                         .protocolVersion(ProtocolVersion.RESP2) // Azure 호환성 유지
-                        .build())
-                .useSsl() // SSL 필수
-                .build();
+                        .build());
+        if (ssl) clientBuilder.useSsl();
+        LettuceClientConfiguration clientConfig = clientBuilder.build();
 
         return new LettuceConnectionFactory(serverConfig, clientConfig);
     }

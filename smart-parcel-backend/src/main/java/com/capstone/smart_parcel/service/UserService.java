@@ -18,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     private static String normalize(String s) {
         if (s == null) throw new IllegalArgumentException("값이 비었습니다.");
@@ -41,28 +42,21 @@ public class UserService {
         // 기본권한 보정
         Role role = dto.getRole() == null ? Role.STAFF : dto.getRole();
 
-        // --- 직원이면 관리자 매핑 필수 ---
-        User manager = null;
+        // Public signup may create an organization, but cannot self-enroll in someone else's organization.
         if (role == Role.STAFF) {
-            String managerEmail = normalize(dto.getManagerEmail());
-            if (managerEmail == null || managerEmail.isBlank()) {
-                throw new IllegalArgumentException("직원 가입 시 관리자 이메일이 필요합니다.");
-            }
-            if (managerEmail.equals(email)) {
-                throw new IllegalArgumentException("본인을 관리자로 지정할 수 없습니다.");
-            }
-            manager = userRepository.findByEmailAndRole(managerEmail, Role.MANAGER)
-                    .orElseThrow(() -> new IllegalArgumentException("관리자를 찾을 수 없거나 관리자 권한이 아닙니다."));
+            throw new IllegalArgumentException("Staff accounts must be created by their organization manager");
         }
-
         User user = new User();
         user.setEmail(email);
         user.setName(name);
         user.setBizNumber(dto.getBizNumber());
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setManager(manager); // MANAGER면 null, STAFF면 FK 세팅
+        user.setManager(null);
 
+        user.setOrganizationId(jdbc.queryForObject(
+                "INSERT INTO parcel.organizations(code,name) VALUES (?,?) RETURNING id",
+                Long.class, java.util.UUID.randomUUID().toString(), name));
         try {
             userRepository.save(user); // uq_users_email 최종 방어
         } catch (DataIntegrityViolationException e) {

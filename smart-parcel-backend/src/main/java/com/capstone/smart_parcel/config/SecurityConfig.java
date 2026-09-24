@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/devices/**").permitAll()
+                        .requestMatchers("/api/devices/**", "/api/chutes/**", "/api/sorting-groups/**", "/api/sorting-rules/**").denyAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(storageProperties.publicUrlPattern()).permitAll()
                         .anyRequest().authenticated()

@@ -104,3 +104,10 @@ smart-parcel-mobile/app.*.map.json
 smart-parcel-mobile/android/app/debug
 smart-parcel-mobile/android/app/profile
 smart-parcel-mobile/android/app/release
+
+# Local device simulation and infrastructure
+.env
+.local/
+**/__pycache__/
+*.sqlite3
+*.sqlite3-*
