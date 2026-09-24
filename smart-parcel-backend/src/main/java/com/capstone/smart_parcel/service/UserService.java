@@ -18,13 +18,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final com.capstone.smart_parcel.repository.OrganizationRepository organizations;
 
     private static String normalize(String s) {
         if (s == null) throw new IllegalArgumentException("값이 비었습니다.");
         String v = s.trim();
         if (v.isEmpty()) throw new IllegalArgumentException("값이 비었습니다.");
-        return v.toLowerCase();
+        return v.toLowerCase(java.util.Locale.ROOT);
     }
 
     /** 회원가입 */
@@ -54,9 +54,8 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setManager(null);
 
-        user.setOrganizationId(jdbc.queryForObject(
-                "INSERT INTO parcel.organizations(code,name) VALUES (?,?) RETURNING id",
-                Long.class, java.util.UUID.randomUUID().toString(), name));
+        user.setOrganization(organizations.save(com.capstone.smart_parcel.domain.Organization.builder()
+                .code(java.util.UUID.randomUUID().toString()).name(name).build()));
         try {
             userRepository.save(user); // uq_users_email 최종 방어
         } catch (DataIntegrityViolationException e) {

@@ -1,83 +1,54 @@
 package com.capstone.smart_parcel.service;
-
-import com.capstone.smart_parcel.domain.ErrorLog;
-import com.capstone.smart_parcel.domain.User;
+import com.capstone.smart_parcel.domain.DeviceEvent;
 import com.capstone.smart_parcel.domain.UserNotification;
-import com.capstone.smart_parcel.domain.enums.Role;
 import com.capstone.smart_parcel.dto.common.PageResponse;
 import com.capstone.smart_parcel.dto.notification.NotificationResponse;
 import com.capstone.smart_parcel.repository.UserNotificationRepository;
 import com.capstone.smart_parcel.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import org.springframework.transaction.event.TransactionalEventListener;
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-
-    private final SortingContextService sortingContextService;
-    private final UserNotificationRepository userNotificationRepository;
-    private final UserRepository userRepository;
-    private final NotificationStreamService notificationStreamService;
+    private final SortingContextService access;
+    private final UserRepository users;
+    private final UserNotificationRepository notifications;
+    private final ApplicationEventPublisher publisher;
+    private final NotificationStreamService streams;
+    private record Created(long userId, NotificationResponse notification) {}
 
     @Transactional
-    public void notifyError(ErrorLog errorLog) {
-        if (errorLog == null || errorLog.getManager() == null) {
-            return;
+    public void record(DeviceEvent event) {
+        for (var user : users.findByOrganization_Id(event.getOrganization().getId())) {
+            var n = notifications.save(UserNotification.builder().organization(event.getOrganization())
+                    .event(event).recipient(user).build());
+            publisher.publishEvent(new Created(user.getId(), NotificationResponse.from(n)));
         }
-        User manager = errorLog.getManager();
-        Map<Long, User> recipients = new LinkedHashMap<>();
-        recipients.put(manager.getId(), manager);
-        List<User> staff = userRepository.findByManager_IdAndRole(manager.getId(), Role.STAFF);
-        for (User staffMember : staff) {
-            if (staffMember != null) {
-                recipients.put(staffMember.getId(), staffMember);
-            }
-        }
-        if (recipients.isEmpty()) {
-            return;
-        }
-        List<UserNotification> notifications = recipients.values().stream()
-                .map(user -> UserNotification.builder()
-                        .recipient(user)
-                        .errorLog(errorLog)
-                        .build())
-                .toList();
-        userNotificationRepository.saveAll(notifications);
-
-        notifications.forEach(notification -> {
-            Long recipientId = notification.getRecipient().getId();
-            notificationStreamService.sendNotification(recipientId, NotificationResponse.from(notification));
-        });
     }
+    // No notification can escape a rolled-back event transaction.
+    @TransactionalEventListener
+    public void deliver(Created created) { streams.sendNotification(created.userId(), created.notification()); }
 
     @Transactional(readOnly = true)
-    public PageResponse<NotificationResponse> getNotifications(String email, Boolean unreadOnly, Pageable pageable) {
-        var ctx = sortingContextService.resolve(email);
-        User actor = ctx.actor();
-        Page<UserNotification> page;
-        if (Boolean.TRUE.equals(unreadOnly)) {
-            page = userNotificationRepository.findByRecipient_IdAndIsReadFalse(actor.getId(), pageable);
-        } else {
-            page = userNotificationRepository.findByRecipient_Id(actor.getId(), pageable);
-        }
-        return PageResponse.of(page, NotificationResponse::from);
+    public PageResponse<NotificationResponse> getNotifications(String email, Boolean unreadOnly, Pageable requested) {
+        var user = access.actor(email, false);
+        var page = SortingHistoryService.page(requested.getPageNumber(), requested.getPageSize(), "createdAt", "id");
+        var result = Boolean.TRUE.equals(unreadOnly)
+                ? notifications.findByOrganization_IdAndRecipient_IdAndReadAtIsNull(user.getOrganizationId(), user.getId(), page)
+                : notifications.findByOrganization_IdAndRecipient_Id(user.getOrganizationId(), user.getId(), page);
+        return PageResponse.of(result, NotificationResponse::from);
     }
-
     @Transactional
-    public void markAsRead(String email, Long notificationId) {
-        var ctx = sortingContextService.resolve(email);
-        User actor = ctx.actor();
-        UserNotification notification = userNotificationRepository.findByIdAndRecipient_Id(notificationId, actor.getId())
-                .orElseThrow(() -> new NoSuchElementException("알림을 찾을 수 없습니다."));
-        notification.setRead(true);
+    public void markAsRead(String email, Long id) {
+        var user = access.actor(email, false);
+        var n = notifications.findByOrganization_IdAndRecipient_IdAndId(user.getOrganizationId(), user.getId(), id)
+                .orElseThrow(SortingContextService::notFound);
+        if (n.getReadAt() == null) n.setReadAt(OffsetDateTime.now());
     }
 }

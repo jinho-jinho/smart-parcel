@@ -1,43 +1,38 @@
-// com/capstone/smart_parcel/domain/UserNotification.java
 package com.capstone.smart_parcel.domain;
-
-import jakarta.persistence.*;
-import lombok.*;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(
-        name = "user_notifications",
-        indexes = {
-                @Index(name = "idx_un_read_recipient", columnList = "recipient_user_id, is_read")
-        }
-)
+@Table(name = "user_notifications")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class UserNotification {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name="created_at", nullable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name="is_read", nullable = false)
-    private boolean isRead = false;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "error_log_id",
-            foreignKey = @ForeignKey(name = "fk_un_error"))
-    private ErrorLog errorLog;
-
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "recipient_user_id",
-            foreignKey = @ForeignKey(name = "fk_un_recipient"))
+    @JoinColumn(name = "event_id", nullable = false)
+    private DeviceEvent event;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "recipient_user_id", nullable = false)
     private User recipient;
-    @PrePersist
-    void onCreate() {
-        if (createdAt == null) {
-            createdAt = OffsetDateTime.now();
-        }
-    }
+    @Builder.Default @Column(nullable = false, updatable = false)
+    private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    private OffsetDateTime readAt;
+
 }

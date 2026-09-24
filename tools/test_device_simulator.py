@@ -6,8 +6,8 @@ import urllib.error
 from device_simulator import Client, Spool, enqueue_decision, flush, sample_image
 
 
-CONFIG = {"id": 1, "rules": [{"id": 2, "priority": 1, "input_type": "TEXT",
-                             "input_value": "K1S", "chute_id": 3}]}
+CONFIG = {"id": 1, "rules": [{"id": 2, "priority": 1, "inputType": "TEXT",
+                             "inputValue": "K1S", "chuteId": 3}]}
 
 
 class SimulatorTests(unittest.TestCase):

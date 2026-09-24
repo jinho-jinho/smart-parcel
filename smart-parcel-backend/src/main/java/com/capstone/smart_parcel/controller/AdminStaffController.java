@@ -1,4 +1,9 @@
 package com.capstone.smart_parcel.controller;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import com.capstone.smart_parcel.dto.belt.BeltDtos.StaffInput;
+import com.capstone.smart_parcel.dto.belt.BeltDtos.IdResponse;
 
 import com.capstone.smart_parcel.dto.common.ApiResponse;
 import com.capstone.smart_parcel.dto.common.PageResponse;
@@ -23,6 +28,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminStaffController {
 
     private final StaffAdminService staffAdminService;
+
+    @PostMapping
+    public IdResponse create(
+            Authentication authentication,
+            @Valid @RequestBody
+            StaffInput input) {
+        return new IdResponse(staffAdminService.createStaff(authentication.getName(), input));
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<StaffSummaryResponse>>> listStaff(

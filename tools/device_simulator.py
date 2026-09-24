@@ -104,8 +104,8 @@ class Client:
             return json.loads(body) if body else None
 
     def setup(self):
-        result = self.request("GET", "/api/v2/device/setup")
-        self.request("PUT", "/api/v2/device/applied-version", json.dumps({"versionId": result["id"]}).encode())
+        result = self.request("GET", "/api/devices/setup")
+        self.request("PUT", "/api/devices/applied-version", json.dumps({"versionId": result["id"]}).encode())
         return result
 
     def send(self, row):
@@ -117,7 +117,7 @@ class Client:
             body += (("--" + boundary + "\r\nContent-Disposition: form-data; name=\"image\"; filename=\"capture.png\"\r\n"
                       "Content-Type: application/octet-stream\r\n\r\n").encode() + row["image"] + b"\r\n")
         body += ("--" + boundary + "--\r\n").encode()
-        return self.request("POST", "/api/v2/device/events", body, "multipart/form-data; boundary=" + boundary)
+        return self.request("POST", "/api/devices/events", body, "multipart/form-data; boundary=" + boundary)
 
 
 def enqueue_decision(spool, image):
@@ -127,8 +127,8 @@ def enqueue_decision(spool, image):
     payload = {"eventId": str(uuid.uuid4()), "attemptId": str(uuid.uuid4()), "eventType": "DECISION",
                "occurredAt": timestamp, "capturedAt": timestamp, "decidedAt": timestamp,
                "ruleVersionId": config["id"], "decisionStatus": "MATCHED",
-               "recognizedInputType": rule["input_type"], "recognizedValue": rule["input_value"],
-               "ruleId": rule["id"], "chuteId": rule["chute_id"]}
+               "recognizedInputType": rule["inputType"], "recognizedValue": rule["inputValue"],
+               "ruleId": rule["id"], "chuteId": rule["chuteId"]}
     spool.enqueue(payload, image)
     return payload
 

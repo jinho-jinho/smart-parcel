@@ -38,15 +38,15 @@ def main():
     output = []
     suffix = uuid.uuid4().hex[:8]
     for label, value, angle in [("A", "K1S", 45), ("B", "K2T", 90)]:
-        belt = call("POST", "/api/v2/belts", {"code": "DEMO-" + label + "-" + suffix, "name": "Demo belt " + label})["id"]
-        chute = call("POST", f"/api/v2/belts/{belt}/chutes", {"code": "C1", "name": "Destination " + label})["id"]
-        version = call("POST", f"/api/v2/belts/{belt}/versions", {
+        belt = call("POST", "/api/belts", {"code": "DEMO-" + label + "-" + suffix, "name": "Demo belt " + label})["id"]
+        chute = call("POST", f"/api/belts/{belt}/chutes", {"code": "C1", "name": "Destination " + label})["id"]
+        version = call("POST", f"/api/belts/{belt}/versions", {
             "groupName": "Demo", "chutes": [{"chuteId": chute, "servoDeg": angle}],
             "rules": [{"name": "Text rule", "priority": 1, "inputType": "TEXT",
                        "inputValue": value, "itemName": "Item " + label, "chuteId": chute}]})["id"]
-        call("POST", f"/api/v2/belts/{belt}/versions/{version}/publish")
-        call("PUT", f"/api/v2/belts/{belt}/active-version", {"versionId": version, "expectedVersionId": None})
-        device = call("POST", f"/api/v2/belts/{belt}/devices", {"code": "DEMO-" + label + "-" + suffix})
+        call("POST", f"/api/belts/{belt}/versions/{version}/publish")
+        call("PUT", f"/api/belts/{belt}/active-version", {"versionId": version, "expectedVersionId": None})
+        device = call("POST", f"/api/belts/{belt}/devices", {"code": "DEMO-" + label + "-" + suffix})
         output.append({"label": label, **device})
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(output, indent=2), encoding="utf-8")

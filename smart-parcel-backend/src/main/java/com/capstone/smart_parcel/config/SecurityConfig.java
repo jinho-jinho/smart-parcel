@@ -26,7 +26,6 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-    private final StorageProperties storageProperties;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,9 +64,7 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/devices/**", "/api/chutes/**", "/api/sorting-groups/**", "/api/sorting-rules/**").denyAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(storageProperties.publicUrlPattern()).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

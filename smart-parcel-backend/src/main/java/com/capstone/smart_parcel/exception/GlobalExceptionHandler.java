@@ -33,6 +33,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(new ApiResponse<>(false, null, message));
     }
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<?> handleStatus(org.springframework.web.server.ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(new ApiResponse<>(false, null,
+                e.getReason() == null ? "Request rejected" : e.getReason()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleConflict(org.springframework.dao.DataIntegrityViolationException e) {
+        return fail(HttpStatus.CONFLICT, "Conflicting identity, configuration or ownership");
+    }
+
+    @ExceptionHandler(org.springframework.dao.PessimisticLockingFailureException.class)
+    public ResponseEntity<?> handleLock(org.springframework.dao.PessimisticLockingFailureException e) {
+        return fail(HttpStatus.SERVICE_UNAVAILABLE, "Concurrent update; retry the same request");
+    }
+
     /** 잘못된 인자(도메인 로직) */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException e) {

@@ -1,87 +1,65 @@
 package com.capstone.smart_parcel.service;
 
-import com.capstone.smart_parcel.domain.SortingHistory;
 import com.capstone.smart_parcel.dto.common.PageResponse;
-import com.capstone.smart_parcel.dto.history.SortingHistoryDetailResponse;
-import com.capstone.smart_parcel.dto.history.SortingHistorySummaryResponse;
-import com.capstone.smart_parcel.repository.SortingHistoryRepository;
-import com.capstone.smart_parcel.service.support.ImageUrlResolver;
+import com.capstone.smart_parcel.dto.history.*;
+import com.capstone.smart_parcel.repository.DeviceEventRepository;
+import com.capstone.smart_parcel.repository.EventImageRepository;
+import com.capstone.smart_parcel.repository.SortingAttemptRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.OffsetDateTime;
-import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.List;
+import static com.capstone.smart_parcel.service.SortingContextService.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SortingHistoryService {
+    private final SortingContextService access;
+    private final SortingAttemptRepository attempts;
+    private final DeviceEventRepository events;
+    private final EventImageRepository images;
+    public record ImageContent(String contentType, byte[] bytes) {}
 
-    private final SortingHistoryRepository sortingHistoryRepository;
-    private final SortingContextService sortingContextService;
-    private final ImageUrlResolver imageUrlResolver;
-
-    @Transactional(readOnly = true)
-    public PageResponse<SortingHistorySummaryResponse> getHistory(String email,
-                                                                  OffsetDateTime from,
-                                                                  OffsetDateTime to,
-                                                                  String q,
-                                                                  Long groupId,
-                                                                  Pageable pageable) {
-        var ctx = sortingContextService.resolve(email);
-        Range range = normalizeRange(from, to);
-        Keyword keyword = normalizeKeyword(q);
-
-        Page<SortingHistory> page = sortingHistoryRepository.searchHistory(
-                ctx.manager().getId(),
-                groupId,
-                range.from(),
-                range.to(),
-                keyword.id(),
-                keyword.textPattern(),
-                pageable
-        );
-
-        return PageResponse.of(page, SortingHistorySummaryResponse::from);
+    public PageResponse<AttemptResponse> history(String email, long belt, OffsetDateTime from, OffsetDateTime to, int page, int size) {
+        long org = scope(email, belt, from, to);
+        return PageResponse.of(attempts.findByOrganization_IdAndBelt_IdAndCapturedAtGreaterThanEqualAndCapturedAtLessThan(
+                org, belt, from, to, page(page, size, "capturedAt", "attemptId")), AttemptResponse::from);
     }
-
-    @Transactional(readOnly = true)
-    public SortingHistoryDetailResponse getHistoryDetail(String email, Long historyId) {
-        var ctx = sortingContextService.resolve(email);
-        SortingHistory history = sortingHistoryRepository.findByIdAndManager_Id(historyId, ctx.manager().getId())
-                .orElseThrow(() -> new NoSuchElementException("분류 이력을 찾을 수 없습니다."));
-        return SortingHistoryDetailResponse.from(history, imageUrlResolver.bundle(history.getImageUrl()));
+    public AttemptResponse detail(String email, UUID id) {
+        long org = access.actor(email, false).getOrganizationId();
+        return AttemptResponse.from(attempts.findByOrganization_IdAndAttemptId(org, id).orElseThrow(SortingContextService::notFound));
     }
-
-    private Range normalizeRange(OffsetDateTime from, OffsetDateTime to) {
-        if (from != null && to != null && from.isAfter(to)) {
-            throw new IllegalArgumentException("검색 시작일이 종료일보다 늦습니다.");
-        }
-        return new Range(from, to);
+    public List<EventResponse> events(String email, UUID id) {
+        long org = access.actor(email, false).getOrganizationId();
+        attempts.findByOrganization_IdAndAttemptId(org, id).orElseThrow(SortingContextService::notFound);
+        return events.findByOrganization_IdAndAttempt_AttemptIdOrderByOccurredAtAscEventIdAsc(org, id)
+                .stream().map(EventResponse::from).toList();
     }
-
-    private Keyword normalizeKeyword(String q) {
-        if (q == null) {
-            return Keyword.EMPTY;
-        }
-        String trimmed = q.trim();
-        if (trimmed.isEmpty()) {
-            return Keyword.EMPTY;
-        }
-        try {
-            return new Keyword(Long.parseLong(trimmed), null);
-        } catch (NumberFormatException ignored) {
-            String pattern = "%" + trimmed.toLowerCase(Locale.ROOT) + "%";
-            return new Keyword(null, pattern);
-        }
+    public ImageContent image(String email, UUID eventId) {
+        long org = access.actor(email, false).getOrganizationId();
+        events.findByOrganization_IdAndEventId(org, eventId).orElseThrow(SortingContextService::notFound);
+        var image = images.findById(eventId).orElseThrow(SortingContextService::notFound);
+        return new ImageContent(image.getContentType(), image.getContent());
     }
-
-    private record Range(OffsetDateTime from, OffsetDateTime to) { }
-
-    private record Keyword(Long id, String textPattern) {
-        private static final Keyword EMPTY = new Keyword(null, null);
+    public PageResponse<EventResponse> errors(String email, long belt, OffsetDateTime from, OffsetDateTime to, int page, int size) {
+        long org = scope(email, belt, from, to);
+        return PageResponse.of(events.findByOrganization_IdAndBelt_IdAndErrorCodeIsNotNullAndOccurredAtGreaterThanEqualAndOccurredAtLessThan(
+                org, belt, from, to, page(page, size, "occurredAt", "eventId")), EventResponse::from);
+    }
+    private long scope(String email, long belt, OffsetDateTime from, OffsetDateTime to) {
+        long org = access.actor(email, false).getOrganizationId();
+        access.belt(org, belt);
+        require(from.isBefore(to), "from must precede to");
+        return org;
+    }
+    public static Pageable page(int page, int size, String... fields) {
+        require(size >= 1 && size <= 100 && page >= 0 && page <= 1000000, "Invalid page/size");
+        return PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, fields));
     }
 }
